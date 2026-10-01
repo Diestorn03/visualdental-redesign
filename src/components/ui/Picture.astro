@@ -1,0 +1,45 @@
+---
+/*
+  <picture> for an entry of src/data/media.js: AVIF + WebP + JPG, srcset by width, width/height (CLS 0), object-position.
+  <Picture img={media.hero.arch} sizes="100vw" loading="eager" fetchpriority="high" class="hero__photo" />
+  The LCP image (hero) must pass loading="eager" fetchpriority="high". `class` lands on the <img>; from a parent's scoped CSS
+  reach it with :global(img). By default the <img> fills its frame (width/height 100 %, object-fit: cover).
+*/
+import { asset } from '../../lib/url.js';
+interface Img { base: string; widths: number[]; w: number; h: number; alt: string; position?: string }
+interface Props {
+  img: Img;
+  sizes?: string;
+  loading?: 'lazy' | 'eager';
+  fetchpriority?: 'high' | 'low' | 'auto';
+  alt?: string;       // overrides img.alt; alt="" marks it decorative
+  class?: string;
+  position?: string;  // overrides img.position
+  [attr: string]: unknown;
+}
+const { img, sizes = '100vw', loading = 'lazy', fetchpriority = 'auto', alt = img.alt, class: cls, position = img.position, ...rest } = Astro.props;
+const srcset = (ext: string) => img.widths.map((w) => `${asset(`${img.base}-${w}.${ext}`)} ${w}w`).join(', ');
+const largest = Math.max(...img.widths);
+---
+<picture>
+  <source type="image/avif" srcset={srcset('avif')} sizes={sizes} />
+  <source type="image/webp" srcset={srcset('webp')} sizes={sizes} />
+  <img
+    class={cls}
+    src={asset(`${img.base}-${largest}.jpg`)}
+    srcset={srcset('jpg')}
+    sizes={sizes}
+    width={img.w}
+    height={img.h}
+    alt={alt}
+    loading={loading}
+    decoding="async"
+    fetchpriority={fetchpriority}
+    style={position ? `object-position:${position}` : undefined}
+    {...rest}
+  />
+</picture>
+
+<style>
+  img { display: block; width: 100%; height: 100%; object-fit: cover; }
+</style>

@@ -1,0 +1,110 @@
+---
+// #faq (light): the 8 questions of docs/CONTENT.md §7, verbatim, as a native exclusive accordion (<details name="faq">).
+// The open/close animation is CSS only (::details-content + interpolate-size) and degrades to the native instant toggle.
+import Button from '../ui/Button.astro';
+import Icon from '../ui/Icon.astro';
+
+const faqs = [
+  { q: 'What types of cases do you specialize in?', a: 'We focus on high-aesthetic restorative dentistry, including veneers, full-mouth reconstructions, implant restorations, and digital smile design cases.' },
+  { q: 'Do you accept digital scans?', a: 'Yes. We work seamlessly with all major intraoral scanners and accept STL, DICOM, and Smilecloud® shared cases.' },
+  { q: 'How does your digital workflow improve case outcomes?', a: 'Our hybrid process blends precise digital modeling with hand-finished artistry, ensuring restorations that look natural, fit accurately, and photograph beautifully.' },
+  { q: 'What is your turnaround time?', a: 'Turnaround times vary by case type, but most aesthetic cases are completed in 10–14 days. Rush services may be available upon request.' },
+  { q: 'Can you collaborate directly with dentists during treatment planning?', a: 'Absolutely. We offer virtual case reviews, Smilecloud® share links, and one-on-one consultations to align treatment goals from the start.' },
+  { q: 'Do you offer try-ins or prototypes?', a: 'Yes. Digital mock-ups, 3D printed prototypes, and bisque try-ins are available to ensure accuracy before final fabrication.' },
+  { q: 'What materials do you work with?', a: 'We specialize in esthetic ceramics, including layered zirconia, lithium disilicate, and hybrid ceramic solutions. Material recommendations are tailored to each clinical scenario.' },
+  {
+    q: 'How do I submit a new case?',
+    a: 'You can send a case through:',
+    list: ['your intraoral scanner export', 'a Smilecloud® shared case', 'our online case submission form', 'direct file upload with photographs'],
+  },
+];
+---
+<section id="faq" data-theme="light" class="section faq" aria-labelledby="faq-title">
+  <div class="container faq__grid">
+    <header class="faq__head">
+      <p class="eyebrow">FAQ</p>
+      <h2 id="faq-title" data-split="lines">Frequently asked questions</h2>
+      <div class="faq__cta" data-reveal="fade" data-delay=".2">
+        <Button variant="ghost" icon="arrow-right" href="#contact" data-topic="consultation">Book a consultation</Button>
+      </div>
+    </header>
+
+    <div class="faq__list" data-stagger=".07">
+      {faqs.map((f, i) => (
+        <details class="faq__item" name="faq" open={i === 0}>
+          <summary class="faq__q">
+            <span class="faq__n num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <span class="faq__t">{f.q}</span>
+            <span class="faq__i"><Icon name="plus" size={22} /></span>
+          </summary>
+          <div class="faq__a">
+            <p>{f.a}</p>
+            {f.list && (
+              <>
+                <ul class="faq__ways">{f.list.map((w) => <li>{w}</li>)}</ul>
+                <Button variant="link" icon="arrow-right" href="#contact" data-topic="new-case">Send a case</Button>
+              </>
+            )}
+          </div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq__grid { display: grid; gap: clamp(32px, 6vw, 56px); }
+  .faq__cta { margin-top: clamp(24px, 3vw, 40px); }
+
+  .faq__list { border-bottom: 1px solid var(--line); }
+  .faq__item { border-top: 1px solid var(--line); }
+
+  /* question row: [number] [question] [plus]. On phones the number sits above the question to keep the line length usable. */
+  .faq__q {
+    display: grid; grid-template-columns: 1fr auto; grid-template-areas: 'n i' 't i'; column-gap: 16px; align-items: center;
+    padding-block: 1.35rem; min-height: 44px; cursor: pointer; list-style: none; user-select: none;
+  }
+  .faq__q::-webkit-details-marker { display: none; }
+  .faq__q::marker { content: ''; }
+  .faq__n { grid-area: n; font-size: var(--step--1); letter-spacing: 0.2em; color: var(--muted); transition: color var(--d-base) var(--ease-out); }
+  .faq__t { grid-area: t; font-family: var(--font-display); font-size: var(--step-2); line-height: 1.15; letter-spacing: -0.005em; text-wrap: balance; }
+  .faq__i {
+    grid-area: i; display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: var(--r-pill);
+    color: var(--muted);
+    transition: transform var(--d-slow) var(--ease-out), color var(--d-base) var(--ease-out), border-color var(--d-base) var(--ease-out), background-color var(--d-base) var(--ease-out);
+  }
+  .faq__q:hover .faq__n, .faq__item[open] .faq__n { color: var(--stroke); }
+  .faq__q:hover .faq__i { color: var(--stroke); border-color: var(--stroke); }
+  .faq__item[open] .faq__i { transform: rotate(135deg); background: var(--stroke); border-color: var(--stroke); color: var(--bg); } /* plus turns into a close mark */
+  .faq__q:focus-visible { outline-offset: -3px; }
+
+  .faq__a { padding: 0 3.5rem 1.75rem 0; max-width: 64ch; color: var(--muted); line-height: 1.7; }
+  .faq__ways { list-style: none; margin: 1.1rem 0 1.25rem; display: grid; gap: 0.55rem; color: var(--fg); }
+  .faq__ways li { display: flex; gap: 0.85rem; align-items: baseline; }
+  .faq__ways li::before { content: ''; flex: none; width: 1.25rem; height: 1px; background: var(--stroke); transform: translateY(-0.3em); }
+
+  /* animated open/close where the browser can interpolate to `auto`; elsewhere the native toggle is instant */
+  @supports (interpolate-size: allow-keywords) and selector(::details-content) {
+    @media (prefers-reduced-motion: no-preference) {
+      .faq__list { interpolate-size: allow-keywords; }
+      .faq__item::details-content {
+        block-size: 0; opacity: 0; overflow: clip;
+        transition: block-size var(--d-slow) var(--ease-out), opacity var(--d-base) var(--ease-out), content-visibility var(--d-slow) allow-discrete;
+      }
+      .faq__item[open]::details-content { block-size: auto; opacity: 1; }
+      :global(html.calm) .faq__item::details-content { transition: none; }
+    }
+  }
+
+  @media (min-width: 768px) {
+    .faq__q { grid-template-columns: 3.5rem 1fr auto; grid-template-areas: 'n t i'; column-gap: 0; padding-block: 1.6rem; }
+    .faq__t { padding-right: 2rem; }
+    .faq__a { padding-left: 3.5rem; }
+  }
+  @media (min-width: 1000px) {
+    .faq__grid { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gutter); }
+    .faq__head { grid-column: 1 / span 4; align-self: start; position: sticky; top: calc(var(--header-h) + 40px); }
+    .faq__head h2 { font-size: clamp(2.6rem, 1.2rem + 3.6vw, 4.4rem); }
+    .faq__list { grid-column: 6 / span 7; }
+  }
+</style>

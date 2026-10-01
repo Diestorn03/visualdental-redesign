@@ -1,0 +1,122 @@
+/* ==========================================================
+   Visual Dental Arts — "The Ceramist's Notes" tokens (frozen: only the orchestrator edits this file).
+   Components use ONLY the semantic aliases (--bg --fg --muted --stroke --line, plus --surface --danger), never raw hex.
+
+   Palettes:  <html data-palette="amber|mono">  (default amber; ?palette= and localStorage 'vd-palette', see Base.astro).
+              The selector is [data-palette], not html[...], so a subtree can show the other palette (e.g. a swatch).
+   Themes:    <section data-theme="dark|light">  switches the semantic aliases for that subtree.
+
+   Contrast (WCAG 2.x, computed with the relative-luminance formula, node script; AA text >= 4.5, large/UI >= 3):
+     amber  --fg  paper #F7F4EF on ink #161414 ..... 16.73   |  ink on paper ................................ 16.73
+            --muted silver #A8A29C on ink ........... 7.26   |  graphite #5E5853 on paper ................... 6.39
+            --stroke accent #D4A373 on ink .......... 8.12   |  accent-ink #8A5A2B on paper ................. 5.35 (on white 5.87)
+            solid button: ink on accent ............. 8.12   |  paper on accent-ink ......................... 5.35
+            --danger #FF9C92 on ink ................. 9.11   |  #B3261E on paper ............................ 5.96
+     mono   --fg  paper #FAFAFA on ink ............. 17.58   |  ink on paper ................................ 17.58
+            --muted silver #9EA0A2 on ink ............ 6.99   |  graphite #5F5F5F on paper ................... 6.12
+            --stroke white on ink ................... 18.35   |  accent-ink (= ink) on paper ................. 17.58
+            --danger #FF9C92 on ink ................. 9.11   |  #B3261E on paper #FAFAFA .................... 6.26
+   Every text pair above clears AA (the lowest is 5.35:1).
+   ========================================================== */
+
+/* ---------- palettes (raw brand colours) ---------- */
+:root,
+[data-palette='amber'] {
+  --ink: #161414;
+  --paper: #f7f4ef; /* warm porcelain */
+  --white: #ffffff;
+  --graphite: #5e5853;
+  --silver: #a8a29c;
+  --accent: #d4a373; /* dentin / studio-lamp amber: lines and numbers on dark */
+  --accent-ink: #8a5a2b; /* the same accent as TEXT on light (AA) */
+}
+[data-palette='mono'] {
+  --ink: #161414;
+  --paper: #fafafa;
+  --white: #ffffff;
+  --graphite: #5f5f5f;
+  --silver: #9ea0a2;
+  --accent: #ffffff;
+  --accent-ink: #161414;
+}
+
+:root {
+  /* ---------- semantic aliases per section theme (dark is the page default) ---------- */
+  --bg: var(--ink);
+  --fg: var(--paper);
+  --muted: var(--silver);
+  --stroke: var(--accent);
+  --line: rgb(255 255 255 / 0.18);
+  --surface: rgb(255 255 255 / 0.04);
+  --danger: #ff9c92;
+
+  /* ---------- type families (fontsource, self-hosted; the *Fallback faces are metric-matched in base.css) ---------- */
+  --font-display: 'Instrument Serif', 'Instrument Serif Fallback', Georgia, 'Times New Roman', serif;
+  --font-label: 'Oswald Variable', 'Oswald Fallback', 'Arial Narrow', sans-serif;
+  --font-body: 'Inter Variable', 'Inter Fallback', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-hand: 'Architects Daughter', 'Segoe Print', 'Bradley Hand', cursive;
+
+  /* ---------- fluid type scale (320 px → ~1600 px) ---------- */
+  --step--1: clamp(0.78rem, 0.76rem + 0.12vw, 0.875rem);
+  --step-0: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --step-1: clamp(1.2rem, 1.08rem + 0.55vw, 1.5rem);
+  --step-2: clamp(1.5rem, 1.2rem + 1.2vw, 2.1rem);
+  --step-3: clamp(2rem, 1.45rem + 2.4vw, 3.2rem);
+  --step-4: clamp(2.6rem, 1.6rem + 4.2vw, 5rem);
+  --step-5: clamp(3.2rem, 1.6rem + 7vw, 7.6rem);
+  --step-6: clamp(4rem, 1.5rem + 10vw, 11rem);
+  --step-7: clamp(5.5rem, 1rem + 17vw, 17rem); /* giant step numbers ("01") */
+
+  /* ---------- space, layout ---------- */
+  --header-h: 72px;
+  --container: 1240px;
+  --gutter: clamp(16px, 4vw, 48px);
+  --section-y: clamp(88px, 11vw, 168px);
+  --radius: 2px; /* boutique: near-square corners */
+  --radius-lg: 6px;
+  --r-pill: 999px;
+
+  /* ---------- motion ---------- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* ~ expo.out */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --d-fast: 0.2s;
+  --d-base: 0.45s;
+  --d-slow: 0.9s;
+
+  /* ---------- stacking ---------- */
+  --z-fab: 90;
+  --z-header: 100;
+  --z-menu: 120;
+  --z-lightbox: 130;
+  --z-ribbon: 140;
+  --z-skip: 1000;
+
+  color-scheme: dark;
+}
+@media (max-width: 767px) {
+  :root { --header-h: 64px; }
+}
+
+[data-theme='dark'] {
+  --bg: var(--ink);
+  --fg: var(--paper);
+  --muted: var(--silver);
+  --stroke: var(--accent);
+  --line: rgb(255 255 255 / 0.18);
+  --surface: rgb(255 255 255 / 0.04);
+  --danger: #ff9c92;
+  color-scheme: dark;
+}
+[data-theme='light'] {
+  --bg: var(--paper);
+  --fg: var(--ink);
+  --muted: var(--graphite);
+  --stroke: var(--accent-ink);
+  --line: rgb(22 20 20 / 0.14);
+  --surface: rgb(22 20 20 / 0.04);
+  --danger: #b3261e;
+  color-scheme: light;
+}
+@media (prefers-contrast: more) {
+  :root, [data-theme] { --line: currentColor; }
+}

@@ -1,0 +1,187 @@
+---
+/*
+  #services (light): catalogue index 01–06 + the "Analog Meets Digital." close.
+  Wide + fine pointer + motion allowed (env.desktop): hovering or focusing a row shows its photo in a floating panel that trails the
+  pointer inside the empty lane at the right (src/scripts/services.js). Everywhere else (touch, narrow, reduced, no JS) each row shows
+  its photo inline from CSS alone, in the same grid cell, so there is no layout shift between modes.
+*/
+import Picture from '../ui/Picture.astro';
+import Button from '../ui/Button.astro';
+import { media } from '../../data/media.js';
+import { asset } from '../../lib/url.js';
+
+// CONTENT §3, verbatim. `key` = media.services.<key>
+const items = [
+  { key: 'dsd', title: 'Digital Smile Design (DSD) & Esthetic Planning', text: 'Creating digital previews, 3D smile simulations, and treatment mock-ups for dentists and patients.' },
+  { key: 'printing', title: '3D Printing & Milling Solutions', text: 'Crown, bridge, implant, and temporary restorations produced using in-house multi-material 3D printers and mills.' },
+  { key: 'shade', title: 'Shade-Taking & Mobile Patient Consultations', text: 'On-site or virtual shade matching, esthetic photography, and functional analysis.' },
+  { key: 'implant', title: 'Implant Restoration Planning & Custom Abutments', text: 'Digital implant workflows, guided surgery collaboration, and CAD/CAM abutment design.' },
+  { key: 'ceramic', title: 'High-End Ceramic Artistry', text: 'Hand-layered ceramics, custom staining, analog mastery, and natural-looking restorations.' },
+  { key: 'education', title: 'Continuing Education & In-House Lectures', text: 'Hands-on workshops, lunch-and-learns, case review sessions, and paid lecture bookings.', href: '#education' },
+];
+const materials = ['layered zirconia', 'lithium disilicate', 'hybrid ceramics'];
+const files = ['STL', 'DICOM', 'Smilecloud®'];
+const loop = media.loops?.ceramic; // plays in the panel for the ceramic row
+const two = (n) => String(n + 1).padStart(2, '0');
+---
+<section id="services" data-theme="light" class="section svc" aria-labelledby="services-title">
+  <div class="container">
+    <header class="svc__head">
+      <p class="eyebrow" data-reveal="fade">Services</p>
+      <h2 id="services-title" data-split="lines">Exceptional Services Crafted for Modern Dentistry</h2>
+      {/* margin note, only where the panel exists: tells the pointer what the empty lane is for */}
+      <p class="svc__hint hand" aria-hidden="true" data-reveal="fade" data-delay=".5">
+        Hover a row to see the work
+        <svg data-draw data-delay=".9" viewBox="0 0 64 72" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+          <path d="M10 4C44 8 58 30 34 64" />
+          <path d="M25 54L34 65L44 55" />
+        </svg>
+      </p>
+    </header>
+
+    <div class="svc__index">
+      <ol class="svc__list" role="list">
+        {items.map((it, i) => (
+          <li class:list={['svc__row', it.href && 'svc__row--link']} data-reveal="up" data-delay={((i % 3) * 0.08).toFixed(2)}>
+            <span class="svc__num num" aria-hidden="true">{two(i)}</span>
+            <div class="svc__text">
+              <h3 class="svc__title">{it.title}</h3>
+              <p class="svc__desc">{it.text}</p>
+              {it.href && <Button variant="link" size="sm" icon="arrow-right" href={it.href} class="svc__more">Explore education</Button>}
+            </div>
+            <figure class="svc__thumb">
+              <Picture img={media.services[it.key]} sizes="(min-width: 768px) 440px, calc(100vw - 80px)" />
+            </figure>
+          </li>
+        ))}
+      </ol>
+
+      {/* decorative, aria-hidden: the lane the panel travels in, and the panel itself (one slide per row) */}
+      <div class="svc__lane" aria-hidden="true"></div>
+      <div class="svc__panel" aria-hidden="true">
+        {items.map((it, i) => (
+          <div class="svc__slide">
+            {it.key === 'ceramic' && loop ? (
+              <video class="svc__video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" width={loop.w} height={loop.h} data-poster={asset(`${loop.poster.base}-960.jpg`)}>
+                <source src={asset(`${loop.base}.webm`)} type="video/webm" />
+                <source src={asset(`${loop.base}.mp4`)} type="video/mp4" />
+              </video>
+            ) : (
+              <Picture img={media.services[it.key]} sizes="(min-width: 1400px) 400px, 30vw" alt="" />
+            )}
+            <span class="svc__tag num">{two(i)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="svc__close">
+      <svg class="svc__rule" data-draw viewBox="0 0 1200 56" fill="none" stroke="var(--stroke)" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M0 28C60 28 90 6 150 6S240 50 300 50S390 8 450 8S520 28 560 28" />
+        <path d="M560 28L620 8L680 48L740 8L800 48L860 8L920 28H1190" />
+        <path d="M620 8H860M680 48H800" />
+        <circle cx="1195" cy="28" r="3" />
+      </svg>
+      <div class="svc__close-grid">
+        <h3 class="svc__close-title" data-split="lines">Analog <em>Meets</em> Digital.</h3>
+        <div class="svc__close-body">
+          <p class="lead" data-reveal="up">Where timeless craftsmanship merges seamlessly with modern digital innovation.</p>
+          <div class="svc__chips" data-reveal="up" data-delay=".1">
+            <div>
+              <p id="svc-materials" class="svc__label">Materials</p>
+              <ul class="svc__chiplist" role="list" aria-labelledby="svc-materials">
+                {materials.map((m) => <li class="svc__chip">{m}</li>)}
+              </ul>
+            </div>
+            <div>
+              <p id="svc-files" class="svc__label">Files</p>
+              <ul class="svc__chiplist svc__chiplist--files" role="list" aria-labelledby="svc-files">
+                {files.map((f) => <li class="svc__chip">{f}</li>)}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .svc { --lane: clamp(200px, 32%, 440px); --pw: clamp(240px, 24vw, 400px); }
+
+  .svc__head { position: relative; margin-bottom: clamp(40px, 6vw, 88px); }
+  .svc__head h2 { max-width: 54rem; }
+  .svc__hint { display: none; position: absolute; right: 0; bottom: -4.5rem; width: var(--lane); padding-left: 1.5rem; font-size: var(--step-0); color: var(--stroke); rotate: -3deg; transform-origin: left bottom; pointer-events: none; }
+  .svc__hint svg { width: 44px; height: auto; margin: 0.35rem 0 0 1.25rem; overflow: visible; }
+
+  /* ---------- index ---------- */
+  .svc__index { position: relative; }
+  .svc__list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .svc__row {
+    position: relative; display: grid; align-items: baseline;
+    grid-template-columns: 2.75rem minmax(0, 1fr); column-gap: clamp(12px, 3vw, 40px);
+    padding-block: clamp(28px, 3.6vw, 52px); border-bottom: 1px solid var(--line); border-radius: var(--radius);
+  }
+  /* amber hairline that draws across the active row (transform only) */
+  .svc__row::after { content: ''; position: absolute; inset: auto 0 -1px 0; height: 1px; background: var(--stroke); transform: scaleX(0); transform-origin: left; transition: transform var(--d-slow) var(--ease-out); pointer-events: none; }
+  .svc__num { font-size: var(--step-0); color: var(--muted); transition: color var(--d-base) var(--ease-out), opacity var(--d-base) var(--ease-out); }
+  .svc__title { font-size: clamp(1.65rem, 1.1rem + 2.6vw, 2.1rem); line-height: 1.06; transition: opacity var(--d-base) var(--ease-out); }
+  .svc__desc { margin-top: 0.85rem; max-width: 46ch; color: var(--muted); }
+  .svc__text :global(.svc__more) { margin-top: 0.75rem; }
+  .svc__row--link { cursor: pointer; }
+  .svc__row--link :global(.svc__more)::after { content: ''; position: absolute; inset: 0; } /* whole row is the link */
+
+  /* inline photo: touch, narrow, reduced, no JS */
+  .svc__thumb { position: relative; grid-column: 2; margin: 1.5rem 0 0; aspect-ratio: 16 / 10; overflow: hidden; background: var(--surface); }
+  .svc__thumb :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  @media (min-width: 768px) {
+    .svc__row { grid-template-columns: 3.25rem minmax(0, 1fr) var(--lane); align-items: baseline; }
+    .svc__num { font-size: var(--step-1); }
+    .svc__title { font-size: var(--step-3); }
+    /* wide: the photo is a strip in the lane cell (same cell the floating panel will use, so no shift between modes) */
+    .svc__thumb { grid-column: 3; grid-row: 1; align-self: stretch; margin: 0; aspect-ratio: auto; }
+  }
+  /* the floating panel replaces the strips exactly when the engine's desktop gate is on (same query, so no flash of strips on load) */
+  @media (min-width: 768px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    :global(html.js:not(.calm)) .svc__thumb { display: none; }
+    :global(html.js:not(.calm)) .svc__hint { display: block; }
+  }
+
+  /* hover / focus choreography: only with the panel (html.is-desktop-fx) */
+  :global(html.is-desktop-fx) .svc__list.is-active .svc__row:not(.is-active) :is(.svc__num, .svc__title) { opacity: 0.5; }
+  :global(html.is-desktop-fx) .svc__row.is-active::after { transform: scaleX(1); }
+  :global(html.is-desktop-fx) .svc__row.is-active .svc__num { color: var(--stroke); }
+
+  /* ---------- floating panel (JS places it with x / y; everything else is CSS) ---------- */
+  .svc__lane { position: absolute; top: 0; bottom: 0; right: 0; width: var(--lane); pointer-events: none; }
+  .svc__panel { display: none; position: fixed; left: 0; top: 0; z-index: 2; width: var(--pw); aspect-ratio: 4 / 3; overflow: hidden; background: var(--surface); opacity: 0; pointer-events: none; will-change: transform, opacity; }
+  :global(html.is-desktop-fx) .svc__panel { display: block; }
+  /* slides stay display:none until the list is near the viewport (JS adds .is-warm) so the six photos are not fetched with the page */
+  .svc__slide { position: absolute; inset: 0; display: none; overflow: hidden; clip-path: inset(100% 0% 0% 0%); }
+  .svc__panel.is-warm .svc__slide { display: block; }
+  .svc__slide :global(img), .svc__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .svc__tag { position: absolute; left: 0; top: 0; padding: 8px 14px; background: var(--bg); color: var(--fg); font-size: var(--step--1); line-height: 1.2; }
+
+  /* ---------- close: Analog Meets Digital ---------- */
+  .svc__close { margin-top: clamp(72px, 9vw, 144px); }
+  .svc__rule { width: 100%; height: auto; margin-bottom: clamp(32px, 5vw, 72px); }
+  .svc__rule { overflow: visible; }
+  .svc__rule :is(path, circle) { vector-effect: non-scaling-stroke; }
+  .svc__close-grid { display: grid; gap: 32px clamp(32px, 6vw, 96px); }
+  .svc__close-title { font-size: var(--step-4); line-height: 0.98; }
+  .svc__close-title em { font-style: italic; color: var(--stroke); }
+  .svc__chips { display: grid; gap: 1.75rem; margin-top: 2.25rem; }
+  .svc__label { margin-bottom: 0.8rem; font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); }
+  .svc__chiplist { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+  .svc__chip { display: inline-flex; align-items: center; min-height: 40px; padding: 0 1.15rem; border: 1px solid var(--line); border-radius: var(--r-pill); font-family: var(--font-label); font-size: var(--step--1); font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; line-height: 1.2; }
+  /* materials are round (analog), files are square-cornered (digital) */
+  .svc__chiplist--files .svc__chip { border-radius: var(--radius); border-color: color-mix(in srgb, var(--stroke) 60%, transparent); }
+  @media (min-width: 900px) {
+    .svc__close-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  }
+</style>
+
+<script>
+  import '../../scripts/services.js';
+</script>

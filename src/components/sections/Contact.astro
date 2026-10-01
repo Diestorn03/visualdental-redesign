@@ -1,0 +1,250 @@
+---
+// #contact (dark): intro, three channels, SIMULATED form (docs/CONTENT.md §8: nothing is sent or stored until the redesign is bought) and the studio block.
+// Behaviour lives in src/scripts/contact.js. Any link to #contact with data-topic="new-case|support|consultation|education|other" preselects the Topic.
+import Button from '../ui/Button.astro';
+import Icon from '../ui/Icon.astro';
+import Picture from '../ui/Picture.astro';
+import { media } from '../../data/media.js';
+import { contact, social, demo } from '../../data/site.js';
+
+const channels = [
+  { title: 'Case Support', text: 'Digital files, approvals, and case planning assistance.', topic: 'support' },
+  { title: 'Digital Submissions', text: 'Send STL files, DICOM, or Smilecloud® links anytime.', topic: 'new-case' },
+  { title: 'Consultations', text: 'Book a lab–doctor esthetic or treatment planning consult.', topic: 'consultation' },
+];
+const topics = [
+  ['new-case', 'Send a new case'], ['support', 'Case support'], ['consultation', 'Consultation'], ['education', 'Education / lectures'], ['other', 'Other'],
+];
+// data-msg: shown when empty; data-invalid: shown when filled but malformed (email format, phone pattern)
+const fields = {
+  first: { label: 'First name', msg: 'Please enter your first name.', autocomplete: 'given-name' },
+  last: { label: 'Last name', msg: 'Please enter your last name.', autocomplete: 'family-name' },
+  practice: { label: 'Practice / clinic', autocomplete: 'organization' },
+  email: { label: 'Email', msg: 'Please enter your email address.', invalid: 'Please enter a valid email address.', autocomplete: 'email' },
+  phone: { label: 'Phone', invalid: 'Please enter a valid phone number.', autocomplete: 'tel' },
+};
+const studio = media.ig[4]; // wide view of the studio under the wood ceiling and pendant lamp
+const links = [
+  { icon: 'phone', label: 'Call', text: contact.phoneDisplay, href: contact.phoneHref },
+  { icon: 'mail', label: 'Email', text: contact.email, href: contact.emailHref },
+  { icon: 'instagram', label: 'Instagram', text: social.instagramHandle, href: social.instagram, external: true },
+];
+---
+<section id="contact" data-theme="dark" class="section contact" aria-labelledby="contact-title">
+  <div class="container contact__grid">
+    <div class="contact__intro">
+      <p class="eyebrow">Contact</p>
+      <h2 id="contact-title" data-split="lines">Let's Create Something Beautiful Together</h2>
+      <p class="lead" data-reveal="up" data-delay=".15">We're here to support your cases, answer questions, and collaborate on smile designs. Reach out anytime — we respond quickly and always with care.</p>
+    </div>
+
+    <form id="contact-form" class="form" novalidate aria-label="Contact form" data-state="idle" data-reveal="up">
+      <span class="form__progress" aria-hidden="true"></span>
+      <noscript><p class="form__noscript">This form needs JavaScript. Please call <a href={contact.phoneHref}>{contact.phoneDisplay}</a> or write to <a href={contact.emailHref}>{contact.email}</a>.</p></noscript>
+
+      <div class="form__fields" data-fields>
+        <div class="field">
+          <label for="cf-first">{fields.first.label} <span class="req" aria-hidden="true">*</span></label>
+          <input id="cf-first" name="first" type="text" required autocomplete={fields.first.autocomplete} aria-describedby="cf-first-error" data-msg={fields.first.msg} />
+          <p class="field__error" id="cf-first-error"></p>
+        </div>
+        <div class="field">
+          <label for="cf-last">{fields.last.label} <span class="req" aria-hidden="true">*</span></label>
+          <input id="cf-last" name="last" type="text" required autocomplete={fields.last.autocomplete} aria-describedby="cf-last-error" data-msg={fields.last.msg} />
+          <p class="field__error" id="cf-last-error"></p>
+        </div>
+        <div class="field field--wide">
+          <label for="cf-practice">{fields.practice.label}</label>
+          <input id="cf-practice" name="practice" type="text" autocomplete={fields.practice.autocomplete} aria-describedby="cf-practice-error" />
+          <p class="field__error" id="cf-practice-error"></p>
+        </div>
+        <div class="field">
+          <label for="cf-email">{fields.email.label} <span class="req" aria-hidden="true">*</span></label>
+          <input id="cf-email" name="email" type="email" inputmode="email" required autocomplete={fields.email.autocomplete} aria-describedby="cf-email-error" data-msg={fields.email.msg} data-invalid={fields.email.invalid} />
+          <p class="field__error" id="cf-email-error"></p>
+        </div>
+        <div class="field">
+          <label for="cf-phone">{fields.phone.label}</label>
+          <input id="cf-phone" name="phone" type="tel" inputmode="tel" autocomplete={fields.phone.autocomplete} pattern="[0-9\s\+\-\.\(\)]{7,20}" aria-describedby="cf-phone-error" data-invalid={fields.phone.invalid} />
+          <p class="field__error" id="cf-phone-error"></p>
+        </div>
+        <div class="field field--wide">
+          <label for="cf-topic">Topic <span class="req" aria-hidden="true">*</span></label>
+          <div class="select">
+            <select id="cf-topic" name="topic" required aria-describedby="cf-topic-error" data-msg="Please choose a topic.">
+              <option value="" selected disabled>Select a topic</option>
+              {topics.map(([value, label]) => <option value={value}>{label}</option>)}
+            </select>
+          </div>
+          <p class="field__error" id="cf-topic-error"></p>
+        </div>
+        <div class="field field--wide">
+          <label for="cf-message">Message <span class="req" aria-hidden="true">*</span></label>
+          <textarea id="cf-message" name="message" rows="5" required aria-describedby="cf-message-error" data-msg="Please write a message."></textarea>
+          <p class="field__error" id="cf-message-error"></p>
+        </div>
+
+        <div class="form__submit field--wide">
+          {/* disabled until contact.js runs: without JS the form must not submit (a GET would put personal data in the URL) */}
+          <Button type="submit" size="lg" icon="arrow-right" disabled data-submit>Send message</Button>
+          <p class="form__note muted">
+            <span>* Required</span>
+            {demo && <span>Demo form — no data is sent.</span>}
+          </p>
+        </div>
+      </div>
+
+      <div class="status" role="status" aria-live="polite" tabindex="-1" data-status>
+        <Icon name="check" size={28} class="status__check" />
+        <p class="status__msg" data-msg></p>
+        <button type="button" class="status__again" data-again>Send another message</button>
+      </div>
+    </form>
+
+    <ul class="channels" data-stagger=".1">
+      {channels.map((c) => (
+        <li>
+          <a class="channel" href="#contact-form" data-topic={c.topic}>
+            <div class="channel__text"><h3 class="channel__title">{c.title}</h3><p class="muted">{c.text}</p></div>
+            <Icon name="arrow-right" size={22} class="channel__arrow" />
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <div class="container studio">
+    <div class="studio__info">
+      <h3 class="studio__title" data-reveal="up">Visit Our Studio</h3>
+      <address class="studio__addr" data-reveal="up" data-delay=".08">
+        {contact.street}<br />{contact.city}, {contact.region} {contact.postalCode}
+      </address>
+      <div data-reveal="up" data-delay=".14"><Button variant="link" icon="arrow-up-right" href={contact.mapsUrl}>Open in Google Maps</Button></div>
+      <ul class="studio__links" data-stagger=".08">
+        {links.map((l) => (
+          <li>
+            <a href={l.href} target={l.external ? '_blank' : undefined} rel={l.external ? 'noopener noreferrer' : undefined}>
+              <Icon name={l.icon} size={22} />
+              <span class="studio__label">{l.label}</span>
+              <span class="studio__text">{l.text}{l.external && <span class="sr-only"> (opens in a new tab)</span>}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <figure class="studio__photo" data-reveal="clip">
+      <Picture img={studio} sizes="(min-width: 1000px) 600px, 100vw" position="50% 52%" />
+      <figcaption class="studio__cap num">Beverly Shores, Indiana · 5 min from Lake Michigan</figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .contact__grid { display: grid; gap: clamp(40px, 6vw, 64px); }
+  .contact__intro .lead { margin-top: 1.5rem; }
+
+  /* ---------- channels ---------- */
+  .channels { list-style: none; border-bottom: 1px solid var(--line); }
+  .channels li { border-top: 1px solid var(--line); }
+  .channel { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px; padding-block: 1.4rem; min-height: 44px; }
+  .channel__text { display: grid; gap: 0.35rem; }
+  .channel__title { font-size: var(--step-2); transition: color var(--d-base) var(--ease-out); }
+  .channel :global(.channel__arrow) { color: var(--stroke); transform: rotate(-90deg); transition: transform var(--d-base) var(--ease-out); } /* up: on phones the form sits above the list */
+  .channel:hover .channel__title { color: var(--stroke); }
+  .channel:hover :global(.channel__arrow) { transform: rotate(-90deg) translateX(4px); }
+
+  /* ---------- form ---------- */
+  .form { position: relative; display: block; padding: clamp(22px, 4vw, 44px); background: var(--surface); border: 1px solid var(--line); border-top-color: var(--stroke); border-radius: var(--radius); overflow: hidden; }
+  .form__fields { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.4rem 1.25rem; }
+  .field { display: grid; align-content: start; gap: 0.55rem; min-width: 0; }
+  .field label { font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; line-height: 1.3; color: var(--muted); transition: color var(--d-fast) var(--ease-out); }
+  .field:focus-within label { color: var(--stroke); }
+  .req { color: var(--stroke); }
+  .field input, .field select, .field textarea {
+    width: 100%; min-height: 52px; padding: 0.8rem 1rem; background: transparent; color: var(--fg);
+    border: 1px solid color-mix(in srgb, var(--fg) 45%, transparent); border-radius: var(--radius);
+    font-size: 1rem; line-height: 1.4; transition: border-color var(--d-fast) var(--ease-out), background-color var(--d-fast) var(--ease-out);
+  }
+  .field textarea { min-height: 148px; resize: vertical; }
+  .field input:hover, .field select:hover, .field textarea:hover { border-color: color-mix(in srgb, var(--fg) 75%, transparent); }
+  .field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible { border-color: var(--stroke); outline-offset: 2px; }
+  .field [aria-invalid='true'] { border-color: var(--danger); }
+  .field input:-webkit-autofill { -webkit-text-fill-color: var(--fg); box-shadow: 0 0 0 100px var(--bg) inset; caret-color: var(--fg); }
+  .field__error { font-size: var(--step--1); line-height: 1.4; color: var(--danger); }
+  .field__error:empty { display: none; }
+
+  /* select: native control, hand-drawn chevron */
+  .select { position: relative; }
+  .select::after { content: ''; position: absolute; right: 1.15rem; top: 50%; width: 9px; height: 9px; border: solid var(--fg); border-width: 0 1.25px 1.25px 0; transform: translateY(-70%) rotate(45deg); pointer-events: none; }
+  .field select { appearance: none; padding-right: 2.75rem; cursor: pointer; }
+  .field select:required:invalid { color: var(--muted); }
+  .field select option { color: var(--fg); background: var(--bg); }
+
+  .form__submit { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; margin-top: 0.6rem; }
+  .form__note { display: grid; gap: 0.2rem; font-size: var(--step--1); line-height: 1.4; }
+  .form__noscript { margin-bottom: 1.4rem; padding: 1rem 1.15rem; border: 1px solid var(--stroke); border-radius: var(--radius); }
+  .form__noscript a { color: var(--stroke); text-decoration: underline; text-underline-offset: 0.2em; }
+  :global(html:not(.js)) .form__fields { opacity: 0.55; }
+
+  /* states: idle | sending | error | sent (set by contact.js on the form) */
+  .form__progress { position: absolute; inset: 0 0 auto 0; height: 2px; background: var(--stroke); transform: scaleX(0); transform-origin: 0 50%; }
+  .form[data-state='sending'] .form__progress { animation: vd-send 0.9s linear forwards; }
+  @keyframes vd-send { to { transform: scaleX(1); } }
+
+  .status { display: grid; justify-items: start; gap: 0.9rem; }
+  .status:focus { outline: none; } /* focus target after sending: not interactive */
+  .status > :global(.status__check), .status__again { display: none; }
+  .status__msg { font-size: var(--step--1); line-height: 1.4; color: var(--muted); }
+  .status__msg:empty { display: none; }
+  .form[data-state='error'] .status { margin-top: 1.1rem; }
+  .form[data-state='error'] .status__msg { color: var(--danger); }
+  .form[data-state='sending'] .status__msg { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); } /* the button label already says it: screen readers still get the live text */
+
+  .form[data-state='sent'] .form__fields { display: none; }
+  .form[data-state='sent'] { display: grid; align-content: center; } /* keeps the form's height (set by contact.js) and centres the thank-you in it */
+  .form[data-state='sent'] .status { justify-items: center; text-align: center; gap: 1.4rem; }
+  .form[data-state='sent'] .status > :global(.status__check) { display: block; width: 64px; height: 64px; padding: 16px; color: var(--stroke); border: 1px solid var(--stroke); border-radius: var(--r-pill); }
+  .form[data-state='sent'] .status > :global(.status__check) :global(path) { stroke-dasharray: 24; stroke-dashoffset: 24; animation: vd-check 0.7s var(--ease-out) 0.15s forwards; }
+  @keyframes vd-check { to { stroke-dashoffset: 0; } }
+  .form[data-state='sent'] .status__msg { font-family: var(--font-display); font-size: var(--step-3); line-height: 1.1; color: var(--fg); text-wrap: balance; }
+  .form[data-state='sent'] .status__again { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 4px; font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--stroke); text-decoration: underline; text-underline-offset: 0.45em; }
+
+  /* ---------- studio ---------- */
+  .studio { display: grid; gap: clamp(32px, 5vw, 48px); margin-top: clamp(56px, 9vw, 128px); } /* on phones the channels' bottom hairline already divides */
+  .studio__title { font-size: var(--step-3); }
+  .studio__addr { margin-top: 1.25rem; font-style: normal; font-size: var(--step-1); line-height: 1.4; }
+  .studio__info > div { margin-top: 0.75rem; }
+  .studio__links { list-style: none; margin-top: 1.75rem; border-top: 1px solid var(--line); }
+  .studio__links li { border-bottom: 1px solid var(--line); }
+  .studio__links a { display: grid; grid-template-columns: 22px 1fr; align-items: center; gap: 0 1rem; min-height: 56px; padding-block: 0.6rem; }
+  .studio__links a :global(.icon) { grid-row: 1 / span 2; }
+  .studio__links a :global(.icon) { color: var(--stroke); }
+  .studio__label { font-family: var(--font-label); font-size: var(--step--1); letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+  .studio__text { min-width: 0; overflow-wrap: anywhere; background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 1px; justify-self: start; transition: background-size var(--d-base) var(--ease-out); }
+  .studio__links a:hover .studio__text { background-size: 100% 1px; }
+  .studio__photo { position: relative; margin: 0; aspect-ratio: 4 / 3; overflow: hidden; background: var(--surface); border-radius: var(--radius); }
+  .studio__cap { position: absolute; inset: auto 0 0 0; padding: 2.75rem 1.1rem 1rem; font-size: var(--step--1); letter-spacing: 0.16em; text-transform: uppercase; line-height: 1.4; color: var(--fg); background: linear-gradient(to top, color-mix(in srgb, var(--bg) 85%, transparent), transparent); }
+
+  @media (min-width: 560px) {
+    .form__fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .field--wide { grid-column: 1 / -1; }
+    .studio__links a { grid-template-columns: 22px 8.5rem 1fr; }
+    .studio__links a :global(.icon) { grid-row: auto; }
+  }
+  @media (min-width: 1000px) {
+    .contact__grid { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gutter); row-gap: 0; align-items: start; }
+    .contact__intro { grid-column: 1 / span 5; grid-row: 1; }
+    .contact__intro h2 { font-size: clamp(2.6rem, 1.2rem + 3.6vw, 4.4rem); }
+    .form { grid-column: 7 / span 6; grid-row: 1 / span 2; }
+    .channels { grid-column: 1 / span 5; grid-row: 2; margin-top: clamp(40px, 5vw, 64px); }
+    .channel :global(.channel__arrow) { transform: none; }
+    .channel:hover :global(.channel__arrow) { transform: translateX(4px); }
+    .studio { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gutter); align-items: center; padding-top: clamp(40px, 6vw, 72px); border-top: 1px solid var(--line); }
+    .studio__info { grid-column: 1 / span 5; }
+    .studio__photo { grid-column: 7 / span 6; }
+  }
+</style>
+
+<script>
+  import '../../scripts/contact.js';
+</script>

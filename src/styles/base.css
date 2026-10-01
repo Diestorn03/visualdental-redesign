@@ -1,0 +1,95 @@
+/* ==========================================================
+   Visual Dental Arts — base styles (frozen: only the orchestrator edits this file). Tokens live in tokens.css.
+   Utilities available to every component: .container .section .section__head .eyebrow .display .lead .muted .hand .num
+   .hairline .btn-row .sr-only .sr-only-focusable (+ the data-* motion hooks of engine.js).
+   ========================================================== */
+
+/* ---------- metric-matched fallbacks (size-adjust from the average advance width of English text) so the swap does not shift layout ---------- */
+@font-face { font-family: 'Instrument Serif Fallback'; src: local('Times New Roman'); size-adjust: 84.7%; ascent-override: 116.8%; descent-override: 36.6%; line-gap-override: 0%; }
+@font-face { font-family: 'Inter Fallback'; src: local('Arial'); font-weight: 100 900; size-adjust: 107.5%; ascent-override: 90.1%; descent-override: 22.4%; line-gap-override: 0%; }
+@font-face { font-family: 'Oswald Fallback'; src: local('Arial'); font-weight: 100 900; size-adjust: 72.2%; ascent-override: 165.3%; descent-override: 40%; line-gap-override: 0%; }
+
+/* ---------- reset ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: calc(var(--header-h) + 16px); }
+html.menu-open { overflow: hidden; }
+body {
+  margin: 0; min-height: 100svh;
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: var(--step-0); font-weight: 400; line-height: 1.6;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+main { position: relative; display: block; overflow-x: clip; }
+img, svg, video, canvas { display: block; max-width: 100%; }
+img, video { height: auto; }
+picture { display: contents; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+input, select, textarea { font: inherit; color: inherit; }
+dialog { color: inherit; }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 400; line-height: 1.02; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+h1 { font-size: var(--step-5); }
+h2 { font-size: var(--step-4); }
+h3 { font-size: var(--step-2); line-height: 1.1; }
+h4 { font-size: var(--step-1); line-height: 1.15; }
+p { margin: 0; text-wrap: pretty; }
+p + p { margin-top: 1em; }
+ul, ol { margin: 0; padding: 0; }
+strong { font-weight: 600; }
+::selection { background: var(--stroke); color: var(--bg); }
+
+/* focus: 3 px ring in the section's stroke colour (>= 5.35:1 on every theme, see tokens.css) */
+:focus-visible { outline: 3px solid var(--stroke); outline-offset: 3px; }
+
+.skip-link { position: fixed; left: 12px; top: -80px; z-index: var(--z-skip); padding: 12px 18px; background: var(--paper); color: var(--ink); font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; border-radius: var(--radius); }
+.skip-link:focus { top: 12px; outline: 3px solid var(--accent); outline-offset: 2px; }
+.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+.sr-only-focusable:is(:focus, :active) { position: static !important; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; clip-path: none; white-space: normal; }
+
+/* ---------- layout ---------- */
+.container { width: min(100% - 2 * var(--gutter), var(--container)); margin-inline: auto; }
+.section { position: relative; padding-block: var(--section-y); background: var(--bg); color: var(--fg); isolation: isolate; }
+.section--tight { padding-block: calc(var(--section-y) * 0.6); }
+main > section[id] { scroll-margin-top: calc(-1 * (var(--header-h) + 16px)); } /* anchors land flush: the header then takes the section's theme and the section's own padding clears it */
+/* #services and #faq follow another light section (About, Stories): halve their top padding so the two do not stack; the floor keeps the first line clear of the fixed header when an anchor lands flush. (Not `+`: Astro leaves <script> tags between sections.) */
+main > #services, main > #faq { padding-top: max(calc(var(--section-y) * 0.4), calc(var(--header-h) + 24px)); }
+.section__head { max-width: 40rem; margin-bottom: clamp(32px, 5vw, 72px); }
+.section__head .lead { margin-top: 1.25rem; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; }
+.hairline { height: 1px; background: var(--line); border: 0; margin: 0; }
+
+/* ---------- type ---------- */
+/* eyebrow / step label: Oswald caps with wide tracking, like the wordmark in the logo */
+.eyebrow { display: inline-block; margin-bottom: 1.1rem; font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.24em; text-transform: uppercase; line-height: 1.3; color: var(--stroke); }
+.display { font-family: var(--font-display); font-weight: 400; line-height: 0.98; letter-spacing: -0.015em; text-wrap: balance; }
+.display :is(em, i), :is(h1, h2, h3) :is(em, i) { font-style: italic; }
+.lead { font-size: var(--step-1); line-height: 1.45; color: var(--muted); max-width: 58ch; }
+.muted { color: var(--muted); }
+.hand { font-family: var(--font-hand); line-height: 1.2; } /* Architects Daughter: photo annotations and small notes only, never paragraphs */
+.num { font-family: var(--font-label); font-variant-numeric: tabular-nums; letter-spacing: 0.06em; }
+
+/* ---------- motion engine hooks (see engine.js) ---------- */
+/* Pre-hide only when JS runs. Failsafe: if the engine never boots (script error, stalled network) the content shows after 4 s;
+   the rule switches off as soon as the engine boots (html.fx-booted), so it never fights GSAP. */
+.js [data-reveal], .js [data-stagger] > *, .js [data-draw] { opacity: 0; }
+.js [data-split], .js [data-lit] { visibility: hidden; }
+@keyframes vd-failsafe { to { opacity: 1; visibility: visible; } }
+html.js:not(.fx-booted) :is([data-reveal], [data-stagger] > *, [data-draw], [data-split], [data-lit]) { animation: vd-failsafe 0.4s ease 4s forwards; }
+.split-line-mask, .split-word-mask { padding-block: 0.12em; margin-block: -0.12em; } /* room for descenders and italic overhangs inside SplitText masks */
+/* sibling line masks would collapse their negative margins (-.12em, not -.24em) and make the heading grow while split; a flex column keeps the height identical so the revert does not shift layout */
+:has(> .split-line-mask) { display: flex; flex-direction: column; }
+.lit-word { display: inline-block; }
+/* sections far from the viewport stop ticking their infinite CSS animations (engine.js sets [data-offscreen]) */
+[data-offscreen] *, [data-offscreen] *::before, [data-offscreen] *::after { animation-play-state: paused !important; }
+
+/* ---------- reduced motion: the OS setting OR the footer "Reduce motion" switch (html.calm, set before first paint) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal], .js [data-stagger] > *, .js [data-draw] { opacity: 1 !important; }
+  .js [data-split], .js [data-lit] { visibility: visible !important; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+html.js.calm [data-reveal], html.js.calm [data-stagger] > *, html.js.calm [data-draw] { opacity: 1 !important; }
+html.js.calm [data-split], html.js.calm [data-lit] { visibility: visible !important; }
+html.calm *, html.calm *::before, html.calm *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+main:focus { outline: none; } /* skip-link target */

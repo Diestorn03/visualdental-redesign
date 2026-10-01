@@ -1,0 +1,40 @@
+---
+/*
+  Brand lockup: the molar mark (media.brand.markLight on dark, markDark on light; both are rendered and crossfaded by the nearest
+  [data-theme]) beside the wordmark in live text, two lines like the logo: VISUAL DENTAL / —— ARTS ——.
+  Size it with --logo-h (height of the mark). Decorative: the parent link or heading carries the accessible name.
+*/
+import Picture from '../ui/Picture.astro';
+import { media } from '../../data/media.js';
+const { markLight, markDark } = media.brand;
+---
+<span class="logo">
+  <span class="logo__mark" aria-hidden="true">
+    <Picture img={markLight} alt="" class="logo__img logo__img--light" sizes="64px" loading="eager" />
+    <Picture img={markDark} alt="" class="logo__img logo__img--dark" sizes="64px" loading="eager" />
+  </span>
+  <span class="logo__word" aria-hidden="true">
+    <span class="logo__l1">Visual Dental</span>
+    <span class="logo__l2"><i></i><b>Arts</b><i></i></span>
+  </span>
+</span>
+
+<style>
+  .logo { --logo-h: 40px; display: inline-flex; align-items: center; gap: calc(var(--logo-h) * 0.32); color: var(--fg); }
+  .logo__mark { position: relative; flex: none; height: var(--logo-h); aspect-ratio: 371 / 591; }
+  .logo__mark :global(img) { position: absolute; inset: 0; transition: opacity var(--d-base) var(--ease-out); object-fit: contain; }
+  .logo__mark :global(.logo__img--light) { opacity: var(--mk-light, 1); }
+  .logo__mark :global(.logo__img--dark) { opacity: var(--mk-dark, 0); }
+  /* Oswald caps with wide tracking replicate the logo; the trailing letter-space is pulled back so the rules meet the last letter */
+  .logo__word { display: grid; font-family: var(--font-label); font-weight: 400; font-size: calc(var(--logo-h) * 0.335); line-height: 1.12; letter-spacing: 0.3em; text-transform: uppercase; white-space: nowrap; }
+  .logo__l1 { margin-right: -0.3em; }
+  .logo__l2 { display: flex; align-items: center; gap: 0.7em; }
+  .logo__l2 b { font-weight: inherit; margin-right: -0.3em; }
+  .logo__l2 i { flex: 1; height: 1.5px; border-radius: 2px; background: var(--muted); }
+</style>
+
+<style is:global>
+  /* the mark follows the nearest theme: each [data-theme] redefines these, descendants inherit from the closest one */
+  [data-theme='dark'] { --mk-light: 1; --mk-dark: 0; }
+  [data-theme='light'] { --mk-light: 0; --mk-dark: 1; }
+</style>

@@ -1,0 +1,123 @@
+---
+/*
+  Fixed header: transparent over the hero, glass once scrolled, hides on scroll down and returns on scroll up. It takes the theme
+  (dark|light) of the deepest [data-theme] block under its line and marks the visible section in the nav (aria-current="location").
+  Below 1100 px the nav lives in a full-screen <dialog> (Esc closes, focus stays inside). Logic: src/scripts/chrome.js. --header-h comes from tokens.css.
+*/
+import Button from '../ui/Button.astro';
+import Icon from '../ui/Icon.astro';
+import Logo from './Logo.astro';
+import { brand, nav, cta, contact, social } from '../../data/site.js';
+import { url } from '../../lib/url.js';
+---
+<header class="hdr" data-header data-theme="dark">
+  <div class="hdr__bar container">
+    <a class="hdr__brand" href={url('#top')} aria-label={`${brand.name}, back to top`}><Logo /></a>
+
+    <nav class="hdr__nav" aria-label="Primary">
+      <ul>{nav.map((n) => <li><a href={n.href} data-nav={n.id}>{n.label}</a></li>)}</ul>
+    </nav>
+
+    <div class="hdr__actions">
+      <Button class="hdr__cta" href={cta.href} size="sm" data-topic="new-case">{cta.label}</Button>
+      <button class="hdr__burger" type="button" data-menu-open aria-haspopup="dialog" aria-controls="vd-menu" aria-expanded="false">
+        <span>Menu</span><Icon name="menu" size={24} />
+      </button>
+    </div>
+  </div>
+
+  <dialog id="vd-menu" class="menu" data-theme="dark" aria-label="Menu">
+    <div class="menu__panel">
+      <div class="menu__top container">
+        <Logo />
+        <button class="menu__close" type="button" data-menu-close><span>Close</span><Icon name="close" size={24} /></button>
+      </div>
+      <nav class="container" aria-label="Menu">
+        <ol class="menu__list">
+          {nav.map((n, i) => (
+            <li style={`--i:${i}`}><a href={n.href} data-nav={n.id}><span class="num menu__n">{String(i + 1).padStart(2, '0')}</span><span class="menu__lbl">{n.label}</span></a></li>
+          ))}
+        </ol>
+      </nav>
+      <div class="menu__foot container">
+        <Button href={cta.href} size="lg" icon="arrow-right" data-topic="new-case">{cta.label}</Button>
+        <ul class="menu__lines">
+          <li><a href={contact.phoneHref}><Icon name="phone" size={18} />{contact.phoneDisplay}</a></li>
+          <li><a href={social.instagram} target="_blank" rel="noopener noreferrer"><Icon name="instagram" size={18} />{social.instagramHandle}<span class="sr-only"> (opens in a new tab)</span></a></li>
+        </ul>
+      </div>
+    </div>
+  </dialog>
+</header>
+
+<script>
+  import '../../scripts/chrome.js';
+</script>
+
+<style>
+  .hdr { position: fixed; inset: 0 0 auto 0; z-index: var(--z-header); height: var(--header-h); color: var(--fg); transition: transform 0.6s var(--ease-out), color 0.35s var(--ease-out); animation: hdr-in 0.9s var(--ease-out) 0.1s backwards; }
+  @keyframes hdr-in { from { opacity: 0; transform: translateY(-14px); } }
+  @media (prefers-reduced-motion: reduce) { .hdr { animation: none; } }
+  :global(html.calm) .hdr { animation: none; }
+  .hdr.is-hidden { transform: translateY(-100%); }
+  .hdr.is-hidden:has(:focus-visible) { transform: none; } /* keyboard focus never lands on an off-screen link (a click-restored focus does not pin the header) */
+  :global(html.menu-open) .hdr { transform: none; }
+  /* two backdrops, crossfaded: a soft scrim over the hero, a glass bar with a hairline once the page has scrolled */
+  .hdr::before, .hdr::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; transition: opacity 0.45s var(--ease-out), background-color 0.35s var(--ease-out); }
+  .hdr::before { background: linear-gradient(to bottom, color-mix(in srgb, var(--bg) 72%, transparent), transparent); }
+  .hdr::after { background: color-mix(in srgb, var(--bg) 76%, transparent); border-bottom: 1px solid var(--line); -webkit-backdrop-filter: blur(16px) saturate(140%); backdrop-filter: blur(16px) saturate(140%); opacity: 0; }
+  .hdr.is-scrolled::before { opacity: 0; }
+  .hdr.is-scrolled::after { opacity: 1; }
+  :global(html.is-lite) .hdr::after { background: color-mix(in srgb, var(--bg) 94%, transparent); -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+  .hdr__bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 100%; }
+  .hdr__brand { display: inline-flex; align-items: center; justify-self: start; min-height: 44px; }
+  .hdr__brand :global(.logo) { --logo-h: 38px; }
+  .hdr__nav { display: none; }
+  .hdr__nav ul { display: flex; gap: 2px; list-style: none; }
+  .hdr__nav a { position: relative; display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: color-mix(in srgb, var(--fg) 78%, transparent); transition: color var(--d-base) var(--ease-out); }
+  .hdr__nav a::after { content: ''; position: absolute; left: 14px; right: 14px; bottom: 7px; height: 1px; background: var(--stroke); transform: scaleX(0); transform-origin: left; transition: transform var(--d-base) var(--ease-out); }
+  .hdr__nav a:hover, .hdr__nav a[aria-current] { color: var(--fg); }
+  .hdr__nav a:hover::after, .hdr__nav a[aria-current]::after { transform: scaleX(1); }
+
+  .hdr__actions { display: flex; align-items: center; gap: 12px; }
+  .hdr :global(.hdr__cta) { display: none; }
+  .hdr__burger { display: inline-flex; align-items: center; gap: 0.7rem; min-height: 44px; padding: 0 0.9rem 0 1.1rem; border: 1px solid color-mix(in srgb, var(--fg) 38%, transparent); border-radius: var(--radius); font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; transition: background-color var(--d-base) var(--ease-out), color var(--d-base) var(--ease-out); }
+  .hdr__burger:hover { background: var(--fg); color: var(--bg); }
+  @media (min-width: 768px) { .hdr__brand :global(.logo) { --logo-h: 44px; } .hdr :global(.hdr__cta) { display: inline-flex; } }
+  @media (min-width: 1100px) {
+    .hdr__bar { display: grid; grid-template-columns: 1fr auto 1fr; }
+    .hdr__nav { display: block; }
+    .hdr__actions { justify-self: end; }
+    .hdr__burger { display: none; }
+  }
+  /* without JS there is no menu: keep the brand and the CTA */
+  :global(html:not(.js)) .hdr__burger { display: none; }
+  :global(html:not(.js)) .hdr::before { opacity: 0; }
+  :global(html:not(.js)) .hdr::after { opacity: 1; }
+  :global(html:not(.js)) .hdr :global(.hdr__cta) { display: inline-flex; }
+
+  /* ---------- full-screen menu: a wipe from the top, links rise in sequence ---------- */
+  .menu { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; overflow-y: auto; background: var(--bg); color: var(--fg); clip-path: inset(0 0 100% 0); transition: clip-path 0.5s var(--ease-in-out); }
+  .menu.is-open { clip-path: inset(0); transition-duration: 0.85s; transition-timing-function: var(--ease-out); }
+  .menu::backdrop { background: transparent; }
+  .menu__panel { display: grid; grid-template-rows: auto 1fr auto; min-height: 100%; padding-bottom: max(28px, env(safe-area-inset-bottom)); }
+  .menu__top { display: flex; align-items: center; justify-content: space-between; height: var(--header-h); }
+  .menu__top :global(.logo) { --logo-h: 38px; }
+  .menu__close { display: inline-flex; align-items: center; gap: 0.7rem; min-height: 44px; padding: 0 0.9rem 0 1.1rem; border: 1px solid color-mix(in srgb, var(--fg) 38%, transparent); border-radius: var(--radius); font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; }
+  .menu__panel > nav { display: grid; align-content: center; }
+  .menu__list { list-style: none; margin-block: clamp(16px, 4vh, 40px); }
+  .menu__list li { border-top: 1px solid var(--line); }
+  .menu__list li:last-child { border-bottom: 1px solid var(--line); }
+  .menu__list a { display: flex; align-items: baseline; gap: 1.25rem; min-height: 56px; padding-block: 0.4rem; opacity: 0; transform: translateY(18px); transition: opacity 0.6s var(--ease-out), transform 0.8s var(--ease-out), color var(--d-base) var(--ease-out); transition-delay: calc(0.22s + var(--i) * 0.06s); }
+  .menu.is-open .menu__list a { opacity: 1; transform: none; }
+  .menu__n { font-size: var(--step--1); color: var(--stroke); min-width: 2ch; }
+  .menu__lbl { font-family: var(--font-display); font-size: clamp(2.2rem, 10vw, 3.6rem); line-height: 1.05; letter-spacing: -0.01em; }
+  .menu__list a[aria-current] .menu__lbl { font-style: italic; color: var(--stroke); }
+  .menu__foot { display: grid; justify-items: start; gap: 12px; padding-top: 8px; }
+  .menu__foot :global(.btn) { width: 100%; }
+  .menu__lines { list-style: none; display: grid; gap: 0; }
+  .menu__lines a { display: inline-flex; align-items: center; gap: 0.7rem; min-height: 44px; color: var(--muted); font-size: var(--step--1); }
+  .menu__lines :global(.icon) { color: var(--stroke); }
+  @media (max-height: 560px) { .menu__lbl { font-size: 2rem; } .menu__list a { min-height: 44px; } }
+</style>

@@ -1,0 +1,130 @@
+---
+/*
+  Footer (dark): brand, NAP, navigation, real Instagram, legal links, then the giant wordmark that fills with the scroll
+  (a left-to-right wipe; scrubbed on desktop, played once elsewhere, static when motion is reduced) and the bottom bar with
+  (c) 2026 and the "Reduce motion" switch. Logic: src/scripts/chrome.js.
+*/
+import Button from '../ui/Button.astro';
+import Icon from '../ui/Icon.astro';
+import Logo from './Logo.astro';
+import { brand, contact, social, legal, nav, cta, demo } from '../../data/site.js';
+import { url } from '../../lib/url.js';
+const external = { target: '_blank', rel: 'noopener noreferrer' };
+---
+<footer class:list={['ftr', demo && 'ftr--demo']} data-theme="dark">
+  <div class="container">
+    <div class="ftr__grid">
+      <div class="ftr__brand">
+        <Logo />
+        <p class="ftr__tag">{brand.tagline}</p>
+        <p class="ftr__micro muted">Collaboration &bull; Digital &bull; Education</p>
+        <Button href={cta.href} icon="arrow-right" data-topic="new-case">{cta.label}</Button>
+      </div>
+
+      <div class="ftr__col">
+        <h2 class="ftr__h">Studio</h2>
+        <address class="ftr__addr">
+          <a href={contact.mapsUrl} {...external}>{contact.street}<br />{contact.city}, {contact.region} {contact.postalCode}<br />United States<span class="sr-only"> (opens in a new tab)</span></a>
+          <a href={contact.phoneHref}>{contact.phoneDisplay}</a>
+          <a href={contact.emailHref}>{contact.email}</a>
+        </address>
+      </div>
+
+      <nav class="ftr__col" aria-label="Footer">
+        <h2 class="ftr__h">Explore</h2>
+        <ul class="ftr__list">
+          {nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+          <li><a href={cta.href} data-topic="other">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="ftr__col">
+        <h2 class="ftr__h">Follow</h2>
+        <ul class="ftr__list">
+          <li><a href={social.instagram} {...external}><Icon name="instagram" size={18} />{social.instagramHandle}<span class="sr-only"> (opens in a new tab)</span></a></li>
+        </ul>
+        <h2 class="ftr__h ftr__h--gap">Legal</h2>
+        <ul class="ftr__list">
+          <li><a href={legal.privacy} {...external}>Privacy Policy<span class="sr-only"> (opens in a new tab)</span></a></li>
+          <li><a href={legal.terms} {...external}>Terms &amp; Conditions<span class="sr-only"> (opens in a new tab)</span></a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ftr__giant" aria-hidden="true">
+      <div class="ftr__wm ftr__wm--ghost"><span class="ftr__l1">Visual Dental</span><span class="ftr__l2"><i></i><b>Arts</b><i></i></span></div>
+      <div class="ftr__wm ftr__wm--fill" data-fill><span class="ftr__l1">Visual Dental</span><span class="ftr__l2"><i></i><b>Arts</b><i></i></span></div>
+    </div>
+
+    <div class="ftr__bottom">
+      <p class="ftr__copy">&copy; 2026 {brand.name}</p>
+      <button class="calm" type="button" data-calm aria-pressed="false">
+        <span class="calm__track" aria-hidden="true"><span class="calm__thumb"></span></span>
+        <span>Reduce motion</span>
+        <span class="calm__note muted" hidden>(system setting)</span>
+      </button>
+      <a class="ftr__top" href={url('#top')}>Back to top<Icon name="arrow-right" size={18} class="ftr__up" /></a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  import '../../scripts/chrome.js';
+</script>
+
+<style>
+  .ftr { position: relative; overflow: hidden; background: var(--bg); color: var(--fg); border-top: 1px solid var(--line); padding-block: clamp(64px, 9vw, 120px) calc(var(--bar-h, 0px) + env(safe-area-inset-bottom) + 20px); }
+  @media (min-width: 768px) { .ftr { padding-bottom: 24px; } }
+  .ftr--demo { padding-bottom: calc(var(--bar-h, 0px) + env(safe-area-inset-bottom) + 84px); }
+  @media (min-width: 768px) { .ftr--demo { padding-bottom: 88px; } }
+
+  .ftr__grid { display: grid; gap: 48px 32px; }
+  @media (min-width: 640px) { .ftr__grid { grid-template-columns: 1fr 1fr; } .ftr__brand { grid-column: 1 / -1; } }
+  @media (min-width: 1024px) { .ftr__grid { grid-template-columns: 1.5fr 1fr 0.7fr 1fr; } .ftr__brand { grid-column: auto; } }
+  .ftr__brand { display: grid; justify-items: start; gap: 18px; align-content: start; }
+  .ftr__brand :global(.logo) { --logo-h: 56px; margin-bottom: 6px; }
+  .ftr__tag { font-family: var(--font-display); font-size: var(--step-2); line-height: 1.1; }
+  .ftr__micro { font-family: var(--font-label); font-size: var(--step--1); letter-spacing: 0.2em; text-transform: uppercase; margin-top: -6px; }
+  .ftr__brand :global(.btn) { margin-top: 10px; }
+
+  .ftr__h { margin-bottom: 14px; font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.24em; text-transform: uppercase; line-height: 1.3; color: var(--stroke); }
+  .ftr__h--gap { margin-top: 28px; }
+  .ftr__addr { display: grid; gap: 0; font-style: normal; }
+  .ftr__list { list-style: none; display: grid; gap: 0; }
+  .ftr__addr a, .ftr__list a { display: inline-flex; align-items: center; gap: 0.6rem; min-height: 44px; min-width: 44px; padding-block: 6px; color: color-mix(in srgb, var(--fg) 86%, transparent); overflow-wrap: anywhere; transition: color var(--d-base) var(--ease-out); }
+  .ftr__addr a:first-child { align-items: flex-start; line-height: 1.55; margin-bottom: 8px; }
+  .ftr__addr a:hover, .ftr__list a:hover { color: var(--stroke); }
+  .ftr__list :global(.icon) { color: var(--stroke); }
+
+  /* ---------- giant wordmark: ghost lettering with the accent wipe over it (same markup twice, stacked) ---------- */
+  .ftr__giant { container-type: inline-size; position: relative; margin-top: clamp(64px, 9vw, 128px); }
+  .ftr__wm { display: grid; width: max-content; font-family: var(--font-label); font-weight: 300; font-size: 13.55cqw; line-height: 0.98; letter-spacing: 0.16em; text-transform: uppercase; white-space: nowrap; user-select: none; }
+  .ftr__wm--ghost { color: color-mix(in srgb, var(--fg) 7%, transparent); }
+  .ftr__wm--fill { position: absolute; inset: 0; color: var(--stroke); }
+  .ftr__l1 { margin-right: -0.16em; }
+  .ftr__l2 { display: flex; align-items: center; gap: 0.32em; }
+  .ftr__l2 b { font-weight: inherit; margin-right: -0.16em; }
+  .ftr__l2 i { flex: 1; height: 0.05em; border-radius: 1em; background: currentColor; }
+  .ftr__wm--ghost i { background: color-mix(in srgb, var(--fg) 12%, transparent); }
+  /* hidden only when JS runs and motion is allowed; failsafe shows it after 4 s if the engine never boots */
+  :global(html.js) .ftr__wm--fill { clip-path: inset(0 100% 0 0); }
+  :global(html.js:not(.fx-booted)) .ftr__wm--fill { animation: ftr-failsafe 0.4s ease 4s forwards; }
+  @keyframes ftr-failsafe { to { clip-path: inset(0); } }
+  @media (prefers-reduced-motion: reduce) { :global(html.js) .ftr__wm--fill { clip-path: none !important; } }
+  :global(html.js.calm) .ftr__wm--fill { clip-path: none !important; }
+
+  .ftr__bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 32px; margin-top: clamp(20px, 3vw, 36px); padding-top: 18px; border-top: 1px solid var(--line); font-size: var(--step--1); color: var(--muted); }
+  .ftr__copy { margin: 0; }
+  .ftr__top { display: inline-flex; align-items: center; gap: 0.6rem; min-height: 44px; font-family: var(--font-label); font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--fg); transition: color var(--d-base) var(--ease-out); }
+  .ftr__top:hover { color: var(--stroke); }
+  .ftr__top :global(.ftr__up) { transform: rotate(-90deg); }
+
+  /* Reduce motion: a labelled switch (aria-pressed button) */
+  .calm { display: inline-flex; align-items: center; gap: 0.8rem; min-height: 44px; color: var(--fg); }
+  .calm[disabled] { cursor: default; opacity: 0.8; }
+  .calm__track { position: relative; flex: none; width: 38px; height: 22px; border: 1px solid color-mix(in srgb, var(--fg) 45%, transparent); border-radius: var(--r-pill); transition: background-color var(--d-base) var(--ease-out), border-color var(--d-base) var(--ease-out); }
+  .calm__thumb { position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--fg); transition: transform var(--d-base) var(--ease-out), background-color var(--d-base) var(--ease-out); }
+  .calm[aria-pressed='true'] .calm__track { background: var(--stroke); border-color: var(--stroke); }
+  .calm[aria-pressed='true'] .calm__thumb { transform: translateX(16px); background: var(--bg); }
+  .calm__note { font-size: var(--step--1); }
+</style>

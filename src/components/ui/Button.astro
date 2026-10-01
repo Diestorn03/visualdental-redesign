@@ -1,0 +1,61 @@
+---
+/*
+  <Button href="#contact" icon="arrow-right">Send a case</Button>   → <a>   (http(s) links open in a new tab)
+  <Button type="submit" variant="ghost" size="lg">Send</Button>     → <button>
+  variant: solid (default; fills with the section's --stroke) | ghost (outline, fills on hover) | link (underlined label)
+  size:    sm 44 px | md 48 px (default) | lg 56 px.   icon: any Icon name, iconPosition 'end' (default) | 'start'.
+  Colours come from the section theme (--stroke on --bg), so the same button works on dark and light sections and in both palettes.
+  Extra attributes (data-*, aria-*, id, ...) pass through. Style it from outside with `class` + :global(.btn).
+*/
+import Icon from './Icon.astro';
+interface Props {
+  variant?: 'solid' | 'ghost' | 'link';
+  size?: 'sm' | 'md' | 'lg';
+  href?: string;
+  type?: 'button' | 'submit' | 'reset';
+  icon?: string;
+  iconPosition?: 'start' | 'end';
+  class?: string;
+  [attr: string]: unknown;
+}
+const { variant = 'solid', size = 'md', href, type = 'button', icon, iconPosition = 'end', class: cls, ...rest } = Astro.props;
+const external = !!href && /^https?:\/\//.test(href);
+const Tag = href ? 'a' : 'button';
+---
+<Tag
+  class:list={['btn', `btn--${variant}`, `btn--${size}`, cls]}
+  href={href}
+  type={href ? undefined : type}
+  target={external ? '_blank' : undefined}
+  rel={external ? 'noopener noreferrer' : undefined}
+  {...rest}
+>
+  {icon && iconPosition === 'start' && <Icon name={icon} size={18} class="btn__icon" />}
+  <span class="btn__label"><slot />{external && <span class="sr-only"> (opens in a new tab)</span>}</span>
+  {icon && iconPosition === 'end' && <Icon name={icon} size={18} class="btn__icon" />}
+</Tag>
+
+<style>
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.75rem;
+    min-height: 48px; padding: 0 1.75rem; border: 1px solid transparent; border-radius: var(--radius);
+    font-family: var(--font-label); font-weight: 500; font-size: var(--step--1); letter-spacing: 0.2em; text-transform: uppercase; line-height: 1.2; text-align: center;
+    transition: background-color var(--d-base) var(--ease-out), color var(--d-base) var(--ease-out), border-color var(--d-base) var(--ease-out);
+  }
+  .btn--sm { min-height: 44px; padding: 0 1.25rem; }
+  .btn--lg { min-height: 56px; padding: 0 2.25rem; letter-spacing: 0.24em; }
+  .btn :global(.btn__icon) { transition: transform var(--d-base) var(--ease-out); }
+  .btn:hover :global(.btn__icon) { transform: translateX(4px); }
+  .btn[disabled], .btn[aria-disabled='true'] { opacity: 0.55; cursor: not-allowed; pointer-events: none; }
+
+  .btn--solid { background: var(--stroke); color: var(--bg); border-color: var(--stroke); }
+  .btn--solid:hover { background: transparent; color: var(--stroke); }
+
+  .btn--ghost { background: transparent; color: var(--fg); border-color: color-mix(in srgb, var(--fg) 45%, transparent); }
+  .btn--ghost:hover { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+  /* link: label with a hairline that draws on hover */
+  .btn--link { min-height: 44px; min-width: 44px; padding: 0; border: 0; border-radius: 0; color: var(--stroke); }
+  .btn--link .btn__label { padding-block: 4px; background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 100% 1px; transition: background-size var(--d-base) var(--ease-out); }
+  .btn--link:hover .btn__label { background-size: 0% 1px; background-position: 100% 100%; }
+</style>

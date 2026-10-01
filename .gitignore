@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.astro/
+.vite-*/
+.shots/
+insumos/**/*.mp4
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+
+# material en bruto del cliente (videos, cuadros); el sitio solo usa public/
+insumos/
+.claude/settings.local.json

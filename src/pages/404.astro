@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import Button from '../components/ui/Button.astro';
+import { url } from '../lib/url.js';
+---
+<Base title="Page not found" noindex>
+  <section id="not-found" class="nf section" data-theme="dark" aria-labelledby="nf-title">
+    <div class="container">
+      <p class="eyebrow" data-reveal="fade">Error 404</p>
+      <h1 id="nf-title" class="display" data-split="lines">Page not found.</h1>
+      <p class="lead" data-reveal="up" data-delay=".15">The page you are looking for does not exist or has moved.</p>
+      <div class="btn-row" data-reveal="up" data-delay=".25">
+        <Button href={url()} icon="arrow-right">Back to home</Button>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf { min-height: 100svh; display: grid; align-items: center; padding-top: calc(var(--header-h) + var(--section-y) * 0.4); }
+  .nf h1 { font-size: var(--step-6); margin-bottom: 1.5rem; }
+  .nf .lead { margin-bottom: 2.5rem; }
+</style>

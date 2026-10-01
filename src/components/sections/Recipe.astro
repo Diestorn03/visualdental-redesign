@@ -1,0 +1,155 @@
+---
+/*
+  #process · "The Recipe" (A5). Four steps, one markup, two modes:
+    · list (touch, mobile, reduced motion, no JS): a vertical list, each step with its image; data-reveal / data-draw from the engine.
+    · desktop (fine pointer, >= 768 px, not reduced): src/scripts/recipe.js adds .rc--pin, pins .rc__stage (the only pinned scene of the
+      site) and scrubs one timeline: clip-path wipe between photos (before | after, with a seam line), copy swap, progress, wireframe draw.
+  Copy: docs/CONTENT.md §4. Images: media.recipe.* (all 4:3, so the wire overlay shares the image's coordinate space).
+*/
+import Picture from '../ui/Picture.astro';
+import { media } from '../../data/media.js';
+
+const steps = [
+  { no: 'Step 01', mark: '01', name: 'Design Consultation', text: 'Understanding your philosophy and patient goals.', img: media.recipe.consult },
+  { no: 'Step 02', mark: '02', name: 'Digital Workflow', text: 'Precision modeling and 3D artistry.', img: media.recipe.digital, wire: true },
+  { no: 'Step 03', mark: '03', name: 'Hand Finishing', text: 'The touch that transforms precision into emotion.', img: media.recipe.finishing },
+  {
+    no: 'Result', mark: 'R', name: 'Define · Design · Deliver',
+    text: 'Execute with precision, hand-finished detail, and seamless integration.',
+    note: 'Most aesthetic cases are completed in 10–14 days.', img: media.recipe.result,
+  },
+];
+
+/* Wireframe over the CAD arch in recipe-digital (viewBox = the 1280x960 source). Hull and mesh sit ~10 px off the model, so the
+   drawing reads as a scan mesh without having to match every edge. Same low-poly language as the hero molar. */
+const pt = (a) => a.map((p) => p.join(' ')).join('L');
+const top = [[248, 454], [280, 448], [323, 456], [380, 462], [433, 463], [467, 461], [490, 473], [503, 507]];
+const base = [[482, 562], [455, 583], [413, 602], [367, 611], [313, 607], [270, 597], [244, 572]]; // right to left
+const gum = [[252, 497], [290, 511], [333, 531], [373, 538], [413, 534], [450, 527], [482, 516]];
+const low = [[262, 545], [297, 558], [347, 561], [373, 564], [413, 564], [463, 556]];
+const zig = (a, b) => a.flatMap((p, i) => (i < b.length ? [p, b[i]] : [p])); // a0 b0 a1 b1 ... an
+const hull = [...top, [502, 535], ...base, [231, 535], [232, 497]];
+const wire = {
+  axes: [`M110 535H640M110 527V543M640 527V543`, `M368 372V698M360 372H376M360 698H376`],
+  brackets: ['M205 453V425H233', 'M507 425H535V453', 'M205 617V645H233', 'M507 645H535V617'],
+  mesh: [
+    `M${pt(hull)}Z`, // hull
+    `M${pt(zig(top, gum))}`, // upper crowns
+    `M${pt(gum)}`,
+    `M${pt(zig([...base].reverse(), low))}`, // lower row
+    `M${pt(low)}`,
+    `M${pt(zig(gum, low))}`, // across the gingiva
+  ],
+  nodes: gum,
+};
+---
+<section id="process" data-theme="dark" class="rc section" aria-labelledby="process-title">
+  <div class="container rc__head">
+    <p class="eyebrow" data-reveal="up">How we work</p>
+    <h2 id="process-title" class="display" data-split="lines">From the <em>first line</em> to the <em>final glaze</em>.</h2>
+  </div>
+
+  <div class="rc__stage">
+    <div class="container rc__layout">
+      <ol class="rc__steps" role="list">
+        {steps.map((s, i) => (
+          <li class="rc__step">
+            <div class="rc__txt" data-reveal="up">
+              <p class="rc__no">{s.no}</p>
+              <h3 class="rc__name">{s.name}</h3>
+              <p class="rc__text">{s.text}</p>
+              {s.note && <p class="rc__note hand">{s.note}</p>}
+            </div>
+            <div class="rc__fig">
+              <div class="rc__frame" data-reveal="clip">
+                <Picture
+                  img={s.img}
+                  sizes="(min-width: 1280px) 720px, (min-width: 768px) 56vw, calc(100vw - 32px)"
+                />
+                {s.wire && (
+                  <>
+                    <span class="rc__scrim" aria-hidden="true"></span>
+                    <svg class="rc__wire" viewBox="0 0 1280 960" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-draw data-delay=".5">
+                      {wire.axes.map((d) => <path d={d} />)}
+                      {wire.brackets.map((d) => <path d={d} />)}
+                      {wire.mesh.map((d, k) => <path d={d} class={k > 1 ? 'is-fine' : undefined} />)}
+                      <circle cx="368" cy="535" r="8" />
+                      {wire.nodes.map(([cx, cy]) => <circle cx={cx} cy={cy} r="3" />)}
+                    </svg>
+                  </>
+                )}
+              </div>
+              {i > 0 && <span class="rc__seam" aria-hidden="true"></span>}
+            </div>
+          </li>
+        ))}
+      </ol>
+      <div class="rc__progress" aria-hidden="true">
+        {steps.map((s) => <div class="rc__seg"><span class="rc__mark num">{s.mark}</span><span class="rc__bar"><i></i></span></div>)}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .rc { --rc-gap: clamp(32px, 5vw, 80px); }
+  .rc__head { margin-bottom: clamp(48px, 7vw, 96px); }
+  .rc__head .display { max-width: 15ch; }
+  .rc__head :global(.display em) { color: var(--stroke); }
+
+  /* ---------- list mode (default) ---------- */
+  .rc__steps { list-style: none; display: grid; gap: clamp(72px, 10vw, 136px); }
+  .rc__step { display: grid; gap: 32px; }
+  .rc__no {
+    margin: 0 0 clamp(8px, 1.4vw, 16px); white-space: nowrap; text-transform: uppercase;
+    font-family: var(--font-label); font-weight: 300; font-size: clamp(3.6rem, 19vw, 6.5rem); line-height: 0.9; letter-spacing: 0.03em;
+    color: color-mix(in srgb, var(--fg) 36%, var(--bg)); /* a quiet grey that still clears 3:1 for large text */
+  }
+  .rc__name { font-size: var(--step-3); }
+  .rc__text { margin-top: 0.9rem; max-width: 32ch; font-size: var(--step-1); line-height: 1.4; color: var(--muted); }
+  .rc__note { margin-top: 1.75rem; padding-top: 1.1rem; max-width: 30ch; border-top: 1px solid var(--line); font-size: var(--step-1); color: var(--stroke); }
+
+  .rc__fig { position: relative; width: 100%; aspect-ratio: 4 / 3; outline: 1px solid var(--line); outline-offset: 8px; }
+  .rc__frame { position: absolute; inset: 0; overflow: hidden; background: var(--surface); }
+  .rc__frame :global(img) { transform-origin: 50% 50%; }
+  .rc__scrim { position: absolute; inset: 0; background: linear-gradient(rgb(22 20 20 / 0.5), rgb(22 20 20 / 0.38)); } /* lets the thin lines read on the pale arch, in both palettes */
+  .rc__wire { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: none; stroke: var(--stroke); stroke-width: 1px; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+  .rc__wire :is(path, circle) { vector-effect: non-scaling-stroke; }
+  .rc__wire .is-fine { stroke-opacity: 0.6; }
+  .rc__seam, .rc__progress { display: none; }
+
+  @media (min-width: 768px) {
+    .rc__step { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--rc-gap); align-items: center; }
+    .rc__no { font-size: clamp(4rem, 10vw, 10rem); }
+  }
+
+  /* ---------- pinned scene (class added by recipe.js; same gate as the engine's env.desktop) ---------- */
+  .rc--pin { padding-bottom: 0; }
+  .rc--pin .rc__head { margin-bottom: 0; }
+  .rc--pin .rc__stage {
+    --rc-top: calc(var(--header-h) + 12px); --rc-bot: 40px; --rc-prog: 44px;
+    --rc-fh: calc(100svh - var(--rc-top) - var(--rc-bot) - var(--rc-prog) - 24px);
+    height: 100vh; height: 100svh; padding: var(--rc-top) 0 var(--rc-bot); background: var(--bg);
+  }
+  .rc--pin .rc__layout { height: 100%; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-rows: var(--rc-prog) minmax(0, 1fr); column-gap: var(--rc-gap); row-gap: 24px; }
+  .rc--pin .rc__steps { grid-column: 1 / -1; grid-row: 2; gap: 0; min-height: 0; }
+  .rc--pin .rc__step { grid-area: 1 / 1; gap: var(--rc-gap); min-height: 0; }
+  .rc--pin .rc__no { font-size: clamp(4rem, min(10vw, 17svh), 10rem); }
+  .rc--pin .rc__fig { width: min(100%, calc(var(--rc-fh) * 4 / 3)); justify-self: end; }
+  .rc--pin .rc__frame { will-change: clip-path; }
+  .rc--pin .rc__frame :global(img) { will-change: transform; }
+  .rc--pin .rc__seam { display: block; position: absolute; inset: 0; z-index: 2; opacity: 0; pointer-events: none; }
+  .rc--pin .rc__seam::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 1px; background: var(--stroke); box-shadow: 0 0 0 1px rgb(22 20 20 / 0.35); }
+  .rc--pin .rc__progress { display: grid; grid-column: 1; grid-row: 1; grid-template-columns: repeat(4, 1fr); gap: 12px; align-self: start; max-width: 30rem; }
+  .rc__seg { display: grid; gap: 12px; }
+  .rc__mark { font-size: var(--step--1); letter-spacing: 0.24em; color: var(--muted); opacity: 0.55; transition: color var(--d-base) var(--ease-out), opacity var(--d-base) var(--ease-out); }
+  .rc__seg.is-on .rc__mark { color: var(--stroke); opacity: 1; }
+  .rc__bar { position: relative; height: 2px; overflow: hidden; background: var(--line); }
+  .rc__bar i { position: absolute; inset: 0; background: var(--stroke); transform-origin: 0 50%; }
+
+  @media (max-height: 640px) and (min-width: 768px) { .rc--pin .rc__text { font-size: var(--step-0); } .rc--pin .rc__note { margin-top: 1rem; } }
+</style>
+
+<script>
+  import '../../scripts/recipe.js';
+</script>

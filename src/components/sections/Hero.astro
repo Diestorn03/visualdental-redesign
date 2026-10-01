@@ -1,0 +1,151 @@
+---
+// Hero #top (A2). Signature effect "Drawings and lines": a low-poly molar (tools/svg/hero-mesh.mjs) is drawn stroke by stroke (hero.js, DrawSVG),
+// the macro photo blooms underneath (CSS mask) and the mesh stays on top as a faint blueprint that drifts with the scroll.
+// H1, copy and photo enter with plain CSS animations so nothing waits for JS; without JS the mesh is simply drawn and static.
+import Picture from '../ui/Picture.astro';
+import Button from '../ui/Button.astro';
+import { media } from '../../data/media.js';
+import { url } from '../../lib/url.js';
+import mesh from '../../../tools/svg/hero-mesh.svg?raw';
+
+const tags = ['Collaboration', 'Digital', 'Education'];
+---
+<section id="top" class="hero section" data-theme="dark" aria-labelledby="hero-title">
+  <div class="hero__frame">
+    <div class="hero__photo">
+      <Picture img={media.hero.arch} sizes="(min-width: 960px) 80vw, 100vw" loading="eager" fetchpriority="high" />
+    </div>
+    <div class="hero__shade"></div>
+    <div class="hero__mesh-wrap"><Fragment set:html={mesh} /></div>
+  </div>
+
+  <div class="container hero__in">
+    <div class="hero__copy">
+      <p class="eyebrow hero__rise" style="--i:0">Boutique Dental Laboratory</p>
+      <h1 id="hero-title" class="hero__title"><span class="hero__ln" style="--i:0"><span>The Art of</span></span> <span class="hero__ln hero__ln--it" style="--i:1"><span><em>Boutique</em></span></span> <span class="hero__ln" style="--i:2"><span>Precision.</span></span></h1>
+      <p class="hero__sub hero__rise" style="--i:4">Every case is hand-crafted with precision, shaped by years of artisan technique, and elevated through modern digital technologies.</p>
+      <p class="hero__note hero__rise" style="--i:5"><em>Exceptional quality isn’t an upgrade — it’s our foundation.</em></p>
+      <div class="hero__cta hero__rise" style="--i:6">
+        <Button href={url('#contact')} icon="arrow-right" data-topic="new-case">Send a case</Button>
+        <Button href={url('#contact')} variant="ghost" data-topic="consultation">Book a consultation</Button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container hero__foot hero__rise" style="--i:8">
+    <ul class="hero__tags">{tags.map((t) => <li>{t}</li>)}</ul>
+    <a class="hero__scroll" href={url('#about')} aria-label="Scroll to About"><span class="hero__scroll-txt" aria-hidden="true">Scroll</span><span class="hero__scroll-line" aria-hidden="true"></span></a>
+  </div>
+</section>
+
+<style>
+  @property --hero-r { syntax: '<percentage>'; inherits: false; initial-value: 150%; }
+
+  .hero.section {
+    --mesh-o: 0.8; /* resting opacity of the blueprint overlay (the mesh is small on narrow screens) */
+    min-height: 100svh;
+    display: grid; grid-template-rows: 1fr auto;
+    padding-block: calc(var(--header-h) + 32svh) 0; /* narrow: the copy starts over the faded lower part of the photo */
+    overflow: clip;
+  }
+
+  /* ---------- stage: photo + shade + mesh (top band on narrow screens, right-hand side on wide ones) ---------- */
+  .hero__frame { position: absolute; inset: 0 0 auto 0; height: 50svh; min-height: 360px; z-index: 0; overflow: clip; }
+  .hero__photo { position: absolute; inset: 0; --hero-r: 150%;
+    -webkit-mask-image: radial-gradient(circle at 56% 44%, #000 calc(var(--hero-r) - 34%), transparent var(--hero-r));
+            mask-image: radial-gradient(circle at 56% 44%, #000 calc(var(--hero-r) - 34%), transparent var(--hero-r));
+    animation: hero-bloom 2.4s var(--ease-in-out) 0.9s backwards; }
+  .hero__photo :global(img) { animation: hero-settle 3.2s var(--ease-out) 0.9s backwards; }
+  /* dark veil: keeps AA under the copy and lets the amber lines read over the pale porcelain */
+  .hero__shade { position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(0deg, var(--bg) 0%, transparent 72%); /* fallback without color-mix */
+    background:
+      linear-gradient(0deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 92%, transparent) 22%, transparent 72%),
+      linear-gradient(180deg, color-mix(in srgb, var(--bg) 70%, transparent) 0%, transparent 28%),
+      color-mix(in srgb, var(--bg) 30%, transparent); }
+
+  .hero__mesh-wrap { --mh: 30svh; position: absolute; z-index: 1; top: calc(var(--header-h) + 8px); left: 0; right: 0; margin-inline: auto; height: var(--mh); width: calc(var(--mh) * 412 / 652); color: var(--stroke); opacity: var(--mesh-o); pointer-events: none; }
+  .hero__mesh-wrap :global(.hero__mesh) { width: 100%; height: 100%; overflow: visible; stroke-width: 3; }
+  .hero__mesh-wrap :global(.hero__rim) { stroke-width: 3.8; }
+  .hero__mesh-wrap :global(.hero__dots) { stroke-width: 6.5; }
+  :global(.js) .hero__mesh-wrap { opacity: 0; }
+  :global(html.js:not(.fx-booted)) .hero__mesh-wrap { animation: vd-failsafe 0.4s ease 4s forwards; } /* if the engine never boots */
+
+  /* ---------- copy ---------- */
+  .hero__in { position: relative; z-index: 2; align-self: center; padding-bottom: 28px; }
+  .hero__copy { max-width: 44rem; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 14px; margin-bottom: clamp(12px, 2.2svh, 26px); }
+  .eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--stroke); }
+  .hero__title { font-size: clamp(3.3rem, 17vw, 5.75rem); line-height: 0.9; letter-spacing: -0.022em; text-wrap: nowrap; }
+  .hero__ln { display: block; overflow: clip; padding-block: 0.1em; margin-block: -0.1em; } /* mask for the rise, room for descenders and italic overhang */
+  .hero__ln > span { display: block; animation: hero-line 1.25s var(--ease-out) calc(0.12s + var(--i) * 0.13s) backwards; }
+  .hero__ln--it { padding-left: 0.5em; }
+  .hero__ln em { font-style: italic; color: var(--stroke); }
+  .hero__sub { margin-top: clamp(14px, 2.8svh, 34px); max-width: 33rem; font-size: var(--step-0); line-height: 1.55; color: var(--muted); }
+  .hero__note { margin-top: clamp(10px, 2svh, 22px); max-width: 27ch; font-family: var(--font-display); font-size: var(--step-1); line-height: 1.15; color: var(--fg); }
+  .hero__note::before { content: ''; display: block; width: 40px; height: 1px; margin-bottom: 10px; background: var(--stroke); }
+  .hero__cta { display: grid; gap: 12px; margin-top: clamp(16px, 3svh, 36px); }
+  .hero__cta :global(.btn) { width: 100%; }
+
+  .hero__foot { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: clamp(12px, 2.8svh, 34px); }
+  .hero__tags { display: flex; flex-wrap: wrap; gap: 4px 0; list-style: none; font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+  .hero__tags li + li::before { content: '•'; content: '•' / ''; display: inline-block; margin-inline: 0.9em; color: var(--stroke); }
+  .hero__scroll { display: inline-flex; align-items: center; gap: 14px; min-height: 44px; padding-inline: 4px; font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.3em; text-transform: uppercase; color: var(--fg); }
+  .hero__scroll-line { position: relative; display: block; width: 56px; height: 1px; background: var(--line); overflow: hidden; }
+  .hero__scroll-line::after { content: ''; position: absolute; inset: 0; width: 40%; background: var(--stroke); animation: hero-cue 2.6s var(--ease-in-out) 2.2s infinite; }
+  .hero__scroll:hover .hero__scroll-line { background: var(--stroke); }
+
+  /* ---------- entrance (CSS only: visible without JS) ---------- */
+  .hero__rise { animation: hero-rise 1.1s var(--ease-out) calc(0.15s + var(--i) * 0.11s) backwards; }
+  @keyframes hero-line { from { transform: translateY(108%); } }
+  @keyframes hero-rise { from { opacity: 0; transform: translateY(18px); } }
+  @keyframes hero-bloom { from { --hero-r: 0%; } to { --hero-r: 150%; } }
+  @keyframes hero-settle { from { transform: scale(1.1); } }
+  @keyframes hero-cue { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+
+  /* ---------- wide: copy left, stage right ---------- */
+  @media (max-width: 559px) { .hero__scroll { display: none; } }
+  @media (min-width: 560px) { .hero__cta { display: flex; flex-wrap: wrap; gap: 14px 16px; } .hero__cta :global(.btn) { width: auto; } }
+  @media (min-width: 768px) {
+    .hero__title { font-size: clamp(5rem, 11vw, 8.5rem); }
+    .hero.section { --mesh-o: 0.65; padding-top: calc(var(--header-h) + 31svh); }
+    .hero__frame { height: 48svh; }
+    .hero__mesh-wrap { --mh: 30svh; top: calc(var(--header-h) + 16px); }
+    .hero__mesh-wrap :global(.hero__mesh) { stroke-width: 2.4; }
+    .hero__mesh-wrap :global(.hero__rim) { stroke-width: 3; }
+    .hero__mesh-wrap :global(.hero__dots) { stroke-width: 5; }
+  }
+  @media (min-width: 960px) {
+    .hero.section { --mesh-o: 0.55; padding-top: calc(var(--header-h) + clamp(8px, 2.6svh, 40px)); }
+    .hero__frame { inset: 0 0 0 auto; width: min(72%, 1400px); height: auto; min-height: 0; }
+    .hero__photo { inset: -8% 0; }
+    .hero__shade { background: linear-gradient(90deg, var(--bg) 20%, transparent 80%);
+      background:
+      linear-gradient(90deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 88%, transparent) 22%, color-mix(in srgb, var(--bg) 40%, transparent) 52%, transparent 78%),
+      linear-gradient(0deg, var(--bg) 0%, transparent 26%),
+      linear-gradient(180deg, color-mix(in srgb, var(--bg) 75%, transparent) 0%, transparent 24%),
+      color-mix(in srgb, var(--bg) 26%, transparent); }
+    .hero__mesh-wrap { --mh: clamp(380px, calc(100svh - var(--header-h) - 96px), 780px); top: calc(var(--header-h) + 24px); left: auto; right: clamp(24px, 9%, 200px); margin-inline: 0; }
+    .hero__mesh-wrap :global(.hero__mesh) { stroke-width: 1.5; }
+    .hero__mesh-wrap :global(.hero__rim) { stroke-width: 2.2; }
+    .hero__mesh-wrap :global(.hero__dots) { stroke-width: 3.6; }
+    .hero__title { font-size: clamp(4.2rem, min(10.4vw, 12.6svh), 10.25rem); }
+    .hero__copy { max-width: 40rem; }
+    .hero__cta :global(.btn) { min-height: 56px; padding-inline: 2.25rem; letter-spacing: 0.24em; }
+  }
+
+  /* ---------- reduced motion (OS) and "Reduce motion" (html.calm): full mesh over the photo, nothing moves ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    .hero__rise, .hero__ln > span, .hero__photo, .hero__photo :global(img), .hero__scroll-line::after { animation: none !important; }
+    :global(.js) .hero__mesh-wrap { opacity: var(--mesh-o) !important; }
+    .hero__scroll-line::after { transform: translateX(80%); }
+  }
+  :global(html.calm) .hero__rise, :global(html.calm) .hero__photo { animation: none !important; }
+  :global(html.calm) .hero__ln > span, :global(html.calm) .hero__photo :global(img), :global(html.calm) .hero__scroll-line::after { animation: none !important; }
+  :global(html.calm.js) .hero__mesh-wrap { opacity: var(--mesh-o) !important; }
+  :global(html.calm) .hero__scroll-line::after { transform: translateX(80%); }
+</style>
+
+<script>
+  import '../../scripts/hero.js';
+</script>

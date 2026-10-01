@@ -1,0 +1,182 @@
+---
+/*
+  #education: "Anatomy of a natural restoration". Signature effect: six handwritten notes with guide lines drawn over the macro photo.
+  The SVG overlay shares the photo's coordinate system (viewBox 0 0 1076 810 = the pixel size of media.anatomy.arch, same aspect ratio),
+  so every number below is a pixel of the source image. Desktop: labels sit beside the photo (positioned in the same units).
+  Mobile: numbered markers on the photo + a numbered legend below. Nothing is hidden in CSS: no JS or reduced motion shows it all.
+  Copy: docs/CONTENT.md §5. The terms are standard dental anatomy, not claims.
+*/
+import Picture from '../ui/Picture.astro';
+import Button from '../ui/Button.astro';
+import { media } from '../../data/media.js';
+
+const W = 1076, H = 810;
+// a = anchor (anatomical spot), lead = guide line from the anchor to the label (x,y of the label's near edge = lx,ly), ill = strokes drawn on the tooth
+const annos = [
+  { name: 'Cervical contour', txt: 'Supports the gingival line and emergence profile.', side: 'l', lx: 70, ly: 118, a: [420, 334], tone: 'accent',
+    lead: 'M 420 334 C 360 290 250 170 190 130 S 118 118 86 118',
+    ill: ['M 292 446 C 298 408 318 372 350 349 C 376 334 410 330 440 334 C 480 340 514 376 547 450'] },
+  { name: 'Developmental lobes', txt: 'Soft transitions across the facial surface.', side: 'r', lx: 1006, ly: 125, a: [690, 448], tone: 'fg',
+    lead: 'M 690 448 C 704 330 770 190 880 150 S 950 128 990 125',
+    ill: ['M 648 396 C 640 446 646 500 658 548', 'M 733 430 C 735 490 730 550 727 600'] },
+  { name: 'Line angle', txt: 'Defines the perceived width.', side: 'r', lx: 1006, ly: 290, a: [801, 466], tone: 'accent',
+    lead: 'M 801 466 C 806 404 816 350 846 318 S 930 290 990 290',
+    ill: ['M 786 380 C 796 432 806 490 810 548'] },
+  { name: 'Vertical texture', txt: 'Fine lines that catch light like natural enamel.', side: 'l', lx: 70, ly: 620, a: [324, 606], tone: 'fg',
+    lead: 'M 324 606 C 306 648 240 660 170 650 S 108 630 86 620',
+    ill: ['M 352 572 C 347 590 343 610 339 628', 'M 382 560 C 379 586 376 612 372 636', 'M 412 554 C 411 584 410 614 408 640',
+      'M 442 552 C 442 582 443 612 444 638', 'M 472 556 C 474 584 477 612 480 634', 'M 501 566 C 505 586 509 606 513 624'] },
+  { name: 'Incisal translucency', txt: 'The halo where light passes through.', side: 'r', lx: 1006, ly: 652, a: [905, 597], tone: 'accent',
+    lead: 'M 905 597 C 930 640 960 652 990 652', ill: ['M 842 586 C 872 602 922 604 966 572'] },
+  { name: 'Embrasure', txt: 'The open space that lets each tooth read as its own.', side: 'l', lx: 70, ly: 775, a: [557, 641], tone: 'fg',
+    lead: 'M 557 641 C 555 708 420 770 262 770 S 132 775 86 775', ill: [] },
+];
+
+const formats = ['Hands-on workshops', 'Lunch-and-learns', 'Case review sessions', 'Paid lecture bookings'];
+---
+<section id="education" data-theme="dark" class="section anatomy" aria-labelledby="education-title">
+  <div class="container">
+    <header class="section__head">
+      <p class="eyebrow">Education</p>
+      <h2 id="education-title" class="display" data-split="lines">Anatomy of a natural restoration.</h2>
+      <p class="lead" data-reveal="up" data-delay=".1">Every surface is drawn before it is built. These are the details we teach, and the details we never skip.</p>
+    </header>
+
+    <div class="plate">
+      <div class="plate__fig">
+        <div class="plate__stage">
+          <div class="plate__photo" data-reveal="clip">
+            <Picture img={media.anatomy.arch} sizes="(min-width: 1100px) 880px, calc(100vw - 32px)" />
+          </div>
+
+          <svg class="plate__svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+            {annos.map((a, i) => (
+              <g data-g={i}>
+                <g class={`ill ill--${a.tone}`}>
+                  {a.ill.map((d) => <g class="s"><path class="halo" d={d} /><path class="ink" d={d} /></g>)}
+                </g>
+                <g class="guide"><path class="halo" d={a.lead} /><path class="ink" d={a.lead} /></g>
+                <g class="dot"><circle class="ring" cx={a.a[0]} cy={a.a[1]} r="15" /><circle class="pt" cx={a.a[0]} cy={a.a[1]} r="5.5" /></g>
+              </g>
+            ))}
+          </svg>
+
+          <!-- mobile only: numbered markers at the same anchors (the legend below carries the text) -->
+          <div class="plate__marks" aria-hidden="true">
+            {annos.map((a, i) => <span class="mark" data-i={i} style={`--x:${a.a[0]};--y:${a.a[1]}`}>{i + 1}</span>)}
+          </div>
+        </div>
+
+        <ol class="plate__list" role="list">
+          {annos.map((a, i) => (
+            <li class:list={['anno', `anno--${a.side}`]} data-i={i} style={`--lx:${a.lx};--ly:${a.ly}`}>
+              <div class="anno__in">
+                <p class="anno__name"><span class="anno__n num" aria-hidden="true">{i + 1}</span><span class="hand">{a.name}</span></p>
+                <p class="anno__txt">{a.txt}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+
+    <div class="edu">
+      <div class="edu__main">
+        <h3 class="edu__title display" data-reveal="up">Continuing Education &amp; <span class="nb">In-House</span> Lectures</h3>
+        <ul class="edu__list" role="list" data-stagger=".1">
+          {formats.map((f, i) => <li><span class="num">{String(i + 1).padStart(2, '0')}</span><span>{f}</span></li>)}
+        </ul>
+      </div>
+      <div class="edu__who" data-reveal="up" data-delay=".1">
+        <div class="edu__id">
+          <div class="edu__ph"><Picture img={media.about.ola} alt="" sizes="96px" /></div>
+          <p class="edu__name"><span>Aleksandra Polczynski</span><span class="muted">Master Dental Artist &amp; Educator</span></p>
+        </div>
+        <p class="edu__say display">As an educator and industry speaker, she helps professionals worldwide elevate their artistry and precision.</p>
+        <div class="btn-row">
+          <Button href="#contact" size="lg" icon="arrow-right" data-topic="education">Book a lecture or workshop</Button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .anatomy { border-top: 1px solid var(--line); }
+  .section__head { margin-bottom: clamp(40px, 6vw, 88px); }
+
+  /* ---------- plate: photo + overlay ---------- */
+  .plate__fig { position: relative; }
+  .plate__stage { position: relative; aspect-ratio: 1076 / 810; margin-inline: calc(var(--gutter) * -1); } /* narrow: the photo bleeds to the screen edges (its black merges with the page) */
+  .plate__photo { position: absolute; inset: 0; mask-image: linear-gradient(to bottom, transparent 12%, #000 25%); } /* the macro is cut flat at the top of the gum: let it emerge from the dark */
+  .plate__svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  /* constant stroke width at any scale (DrawSVG reads the vector-effect); a faint dark under-stroke keeps lines legible over the pale porcelain */
+  .plate__svg path, .plate__svg circle { vector-effect: non-scaling-stroke; }
+  .halo { stroke: rgb(22 20 20 / 0.6); stroke-width: 4px; }
+  .ink { stroke: var(--stroke); stroke-width: 1.5px; }
+  .ill .halo { stroke: rgb(22 20 20 / 0.35); stroke-width: 3px; }
+  .ill .ink { stroke: var(--fg); stroke-width: 1.15px; }
+  .ill--accent .ink { stroke: var(--stroke); stroke-width: 1.4px; }
+  .ring { stroke: color-mix(in srgb, var(--stroke) 75%, transparent); stroke-width: 1px; }
+  .pt { fill: var(--stroke); stroke: var(--bg); stroke-width: 2px; }
+  /* guide lines and anchor dots belong to the wide layout; the narrow one uses numbered markers */
+  .guide, .dot { visibility: hidden; }
+
+  .plate__marks { position: absolute; inset: 0; pointer-events: none; }
+  .mark {
+    position: absolute; left: calc(var(--x) * 100% / 1076); top: calc(var(--y) * 100% / 810);
+    display: grid; place-items: center; width: 26px; height: 26px; margin: -13px 0 0 -13px;
+    border: 1px solid var(--stroke); border-radius: 50%; background: rgb(22 20 20 / 0.78);
+    font-family: var(--font-label); font-size: 0.75rem; font-weight: 500; line-height: 1; color: var(--fg);
+  }
+
+  /* ---------- annotations: legend (narrow) ---------- */
+  .plate__list { list-style: none; display: grid; gap: 22px 32px; margin-top: 32px; }
+  @media (min-width: 560px) { .plate__list { grid-template-columns: 1fr 1fr; } }
+  .anno__n {
+    display: grid; place-items: center; flex: none; width: 28px; height: 28px; border: 1px solid var(--stroke); border-radius: 50%;
+    font-size: 0.78rem; line-height: 1; color: var(--fg);
+  }
+  .anno__name { display: flex; align-items: center; gap: 14px; }
+  .anno__name .hand { font-size: var(--step-1); color: var(--fg); }
+  .anno__txt { margin-top: 8px; padding-left: 42px; font-size: var(--step--1); line-height: 1.55; color: var(--muted); }
+
+  /* ---------- annotations: labels beside the photo (wide) ---------- */
+  @media (min-width: 1100px) {
+    .plate { --lab: clamp(11rem, 16vw, 15rem); padding-inline: calc(var(--lab) - 4.55%); } /* % = container width: the label columns end at the container edge */
+    .guide, .dot { visibility: visible; }
+    .plate__stage { margin-inline: 0; }
+    .plate__marks { display: none; }
+    .plate__list { position: absolute; inset: 0; display: block; margin: 0; pointer-events: none; }
+    .anno { position: absolute; width: var(--lab); top: calc(var(--ly) * 100% / 810); margin-top: -0.85rem; }
+    .anno--l { right: calc(100% - var(--lx) * 100% / 1076); text-align: right; }
+    .anno--r { left: calc(var(--lx) * 100% / 1076); }
+    .anno__name { gap: 0.6em; }
+    .anno--l .anno__name { justify-content: flex-end; }
+    .anno__name .hand { font-size: clamp(1.05rem, 0.85rem + 0.55vw, 1.4rem); line-height: 1.15; }
+    .anno__n { width: auto; height: auto; border: 0; border-radius: 0; align-self: flex-start; margin-top: 0.3em; font-size: 0.75rem; letter-spacing: 0.14em; color: var(--stroke); }
+    .anno__txt { padding-left: 0; margin-top: 6px; }
+  }
+
+  /* ---------- education block ---------- */
+  .edu { display: grid; gap: clamp(40px, 6vw, 96px); margin-top: clamp(72px, 10vw, 152px); padding-top: clamp(40px, 6vw, 80px); border-top: 1px solid var(--line); }
+  @media (min-width: 900px) { .edu { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: start; } }
+  .edu__title { font-size: var(--step-3); max-width: 15ch; }
+  .nb { white-space: nowrap; }
+  .edu__list { list-style: none; margin-top: clamp(28px, 4vw, 48px); max-width: 28rem; }
+  .edu__list li { display: flex; align-items: baseline; gap: 1.25rem; padding: 0.95rem 0; border-top: 1px solid var(--line); font-size: var(--step-0); }
+  .edu__list li:last-child { border-bottom: 1px solid var(--line); }
+  .edu__list .num { min-width: 1.75rem; font-size: var(--step--1); letter-spacing: 0.14em; color: var(--stroke); }
+  .edu__id { display: flex; align-items: center; gap: 18px; margin-bottom: clamp(20px, 3vw, 32px); }
+  .edu__ph { width: 72px; height: 72px; flex: none; overflow: hidden; border-radius: var(--radius); border: 1px solid var(--line); }
+  .edu__ph :global(img) { filter: grayscale(1); }
+  .edu__name { display: grid; gap: 4px; }
+  .edu__name span:first-child { font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--stroke); }
+  .edu__name .muted { font-size: var(--step--1); }
+  .edu__say { font-size: var(--step-2); line-height: 1.18; font-style: italic; max-width: 30ch; margin-bottom: clamp(28px, 4vw, 44px); }
+  @media (min-width: 768px) { .edu__say { font-size: var(--step-3); line-height: 1.1; } }
+</style>
+
+<script>
+  import '../../scripts/anatomy.js';
+</script>

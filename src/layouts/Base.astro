@@ -1,0 +1,99 @@
+---
+import '@fontsource/instrument-serif/latin-400.css';
+import '@fontsource/instrument-serif/latin-400-italic.css';
+import '@fontsource-variable/oswald/wght.css';
+import '@fontsource-variable/inter/wght.css';
+import '@fontsource/architects-daughter/latin-400.css';
+import 'lenis/dist/lenis.css';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import instrumentLatin from '@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2?url';
+import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import oswaldLatin from '@fontsource-variable/oswald/files/oswald-latin-wght-normal.woff2?url';
+import Header from '../components/chrome/Header.astro';
+import Footer from '../components/chrome/Footer.astro';
+import ContactFab from '../components/chrome/ContactFab.astro';
+import PaletteSwitch from '../components/chrome/PaletteSwitch.astro';
+import { brand, contact, social, demo } from '../data/site.js';
+import { asset, url } from '../lib/url.js';
+
+interface Props {
+  title: string;         // page title; the brand name is appended unless it is already in it
+  description?: string;
+  chrome?: boolean;      // Header + Footer + ContactFab (404 may turn it off)
+  noindex?: boolean;     // 404: robots noindex, no canonical
+}
+const { title, description = brand.description, chrome = true, noindex = false } = Astro.props;
+const origin = Astro.site?.origin ?? '';
+const canonical = origin + Astro.url.pathname;
+const fullTitle = title.includes(brand.name) ? title : `${title} · ${brand.name}`;
+const ogImage = origin + asset('brand/og.jpg');
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: brand.name,
+  description: 'Boutique dental laboratory',
+  url: origin ? origin + url() : undefined,
+  telephone: '+1-219-278-0110',
+  email: contact.email,
+  address: { '@type': 'PostalAddress', streetAddress: contact.street, addressLocality: contact.city, addressRegion: contact.region, postalCode: contact.postalCode, addressCountry: contact.country },
+  sameAs: [social.instagram],
+  image: origin ? ogImage : undefined,
+};
+---
+<!doctype html>
+<html lang="en" data-theme="dark" data-palette="amber">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {(demo || noindex) && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="theme-color" content="#161414" />
+    <link rel="icon" type="image/png" sizes="32x32" href={asset('brand/favicon-32.png')} />
+    <link rel="icon" type="image/png" sizes="192x192" href={asset('brand/favicon-192.png')} />
+    <link rel="apple-touch-icon" href={asset('brand/apple-touch-icon.png')} />
+    {origin && !noindex && <link rel="canonical" href={canonical} />}
+    <link rel="preload" href={instrumentLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={oswaldLatin} as="font" type="font/woff2" crossorigin />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    {origin && <meta property="og:url" content={canonical} />}
+    {origin && <meta property="og:image" content={ogImage} />}
+    {origin && <meta property="og:image:width" content="1200" />}
+    {origin && <meta property="og:image:height" content="630" />}
+    {origin && <meta property="og:image:alt" content="Visual Dental Arts, boutique dental laboratory" />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <script is:inline>
+      // Before first paint: html.js, palette (?palette=amber|mono, else localStorage 'vd-palette') and html.calm ('vd-calm'). Storage may throw.
+      (function () {
+        var d = document.documentElement;
+        var ls = function (k, v) { try { return v === undefined ? localStorage.getItem(k) : localStorage.setItem(k, v); } catch (e) {} };
+        d.classList.add('js');
+        var q = new URLSearchParams(location.search).get('palette');
+        if (q === 'amber' || q === 'mono') ls('vd-palette', q);
+        var p = q === 'amber' || q === 'mono' ? q : ls('vd-palette');
+        d.setAttribute('data-palette', p === 'mono' ? 'mono' : 'amber');
+        if (ls('vd-calm') === '1') d.classList.add('calm');
+      })();
+    </script>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    {chrome && <Header />}
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    {chrome && <Footer />}
+    {chrome && <ContactFab />}
+    {demo && <PaletteSwitch />}
+    <script>
+      import '../scripts/engine.js';
+    </script>
+  </body>
+</html>

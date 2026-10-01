@@ -1,0 +1,243 @@
+---
+/*
+  #about: four sub-blocks, each with its own theme.  (a) story, light · (b) founders, light · (c) manifesto, dark · (d) studio, light.
+  Motion comes from engine.js hooks (data-split / data-reveal / data-lit / data-draw / data-parallax) plus src/scripts/about.js.
+  Portraits sit on a tinted tile with mix-blend-mode: multiply, so the two headshots (grey gradient / white cutout) read as one pair.
+*/
+import Picture from '../ui/Picture.astro';
+import Icon from '../ui/Icon.astro';
+import { media } from '../../data/media.js';
+
+const { ola, jack, studio1, studio2, studio3, craft } = media.about;
+---
+<section id="about" data-theme="light" class="about" aria-labelledby="about-title">
+
+  <!-- (a) Story · light -->
+  <div class="block block--story" data-theme="light">
+    <div class="container story">
+      <header class="story__head">
+        <p class="eyebrow">Our story</p>
+        <h2 id="about-title" class="display story__title" data-split="lines">
+          <span class="stair">Precision.</span> <em class="stair">Collaboration.</em> <span class="stair">Excellence.</span>
+        </h2>
+      </header>
+
+      <div class="story__rule" aria-hidden="true"></div>
+
+      <div class="story__lead" data-reveal="up">
+        <p class="lead">Visual Dental Arts provides dentists with reliable digital workflows, deep aesthetic expertise, and beautifully crafted ceramic restorations. Our team is committed to consistent quality, fast communication, and long-term partnership.</p>
+      </div>
+      <div class="story__body" data-reveal="up" data-delay=".12">
+        <p>Visual Dental Arts was founded by Aleksandra “Ola” Polczynski and Jack Polczynski, two artisans who believe that technology should never replace craftsmanship&nbsp;— only refine it. Rooted in European artistry and American innovation, the studio bridges analog mastery with digital precision.</p>
+      </div>
+      <p class="story__philosophy display" data-split="lines">Every restoration reflects a singular philosophy: true beauty is <span class="nb"><em>intentional</em> —</span> defined, designed, and delivered with purpose.</p>
+    </div>
+  </div>
+
+  <!-- (b) Founders · light -->
+  <div class="block block--founders" data-theme="light">
+    <div class="container">
+      <p class="eyebrow founders__label">Founders</p>
+      <div class="founders">
+        <article class="founder founder--ola">
+          <figure class="portrait" data-reveal="clip">
+            <Picture img={ola} sizes="(min-width: 1240px) 500px, (min-width: 760px) 42vw, 92vw" />
+          </figure>
+          <div class="founder__text" data-reveal="up" data-delay=".15">
+            <h3 class="founder__name">Aleksandra Polczynski</h3>
+            <p class="founder__role">Master Dental Artist &amp; Educator</p>
+            <p class="founder__bio">Born in Poland, Ola brings a European eye for proportion, harmony, and realism to every restoration. With over a decade of experience, she merges traditional craftsmanship with advanced digital workflows. As an educator and industry speaker, she helps professionals worldwide elevate their artistry and precision.</p>
+          </div>
+        </article>
+
+        <article class="founder founder--jack">
+          <figure class="portrait" data-reveal="clip" data-delay=".15">
+            <Picture img={jack} sizes="(min-width: 1240px) 500px, (min-width: 760px) 42vw, 92vw" />
+          </figure>
+          <div class="founder__text" data-reveal="up" data-delay=".3">
+            <h3 class="founder__name">Jack Polczynski</h3>
+            <p class="founder__role">Master Ceramist &amp; Studio Artisan</p>
+            <p class="founder__bio">Jack brings depth, discipline, and an exceptional eye for detail to Visual Dental Arts. As a master ceramist, his work is defined by precision, texture, and a deep understanding of natural form—where craftsmanship and aesthetics meet.</p>
+          </div>
+        </article>
+      </div>
+
+      <figure class="pull">
+        <span class="pull__mark" aria-hidden="true">“</span>
+        <blockquote class="pull__text display"><p data-split="lines">A smile is more than restoration. It’s the expression of <span class="nb">confidence —</span> and that deserves <em>artistry.</em></p></blockquote>
+        <figcaption class="pull__cite" data-reveal="fade" data-delay=".2">Aleksandra Polczynski</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <!-- (c) Manifesto · dark -->
+  <div class="block block--manifesto" data-theme="dark">
+    <div class="container manifesto-wrap">
+      <h3 class="manifesto display" data-lit>In a world of mass production, we chose <em>craftsmanship.</em></h3>
+      <div class="manifesto__sig">
+        <span>Visual Dental Arts</span>
+        <span class="manifesto__track" aria-hidden="true"><i></i></span>
+        <span>Boutique Dental Laboratory</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- (d) Studio · light -->
+  <div class="block block--studio" data-theme="light">
+    <div class="container">
+      <header class="studio__head">
+        <div class="studio__title">
+          <p class="eyebrow">The artisan studio</p>
+          <h3 class="display" data-split="lines">Beverly Shores, Indiana</h3>
+          <p class="studio__where"><Icon name="pin" size={18} /> 5 min from Lake Michigan</p>
+          <svg class="studio__wave" data-draw viewBox="0 0 240 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true" focusable="false">
+            <path d="M1 8C21 0 41 0 61 8S101 16 121 8S161 0 181 8S221 16 239 8" />
+          </svg>
+        </div>
+        <div class="studio__copy">
+          <p class="studio__first" data-reveal="up">Nestled in the quiet beauty of Beverly Shores, Indiana, the Visual Dental Arts Studio draws daily inspiration from its surroundings. Located just five minutes from the lake, the studio captures the calm, reflective rhythm of Lake Michigan&nbsp;— a place where nature’s balance mirrors the precision and artistry within.</p>
+          <p data-reveal="up" data-delay=".12">Inside, it feels like an artisan studio&nbsp;— a space for creation, not production. Porcelain powders sit beside digital scanners; handcrafted tools rest beside 3D printers.</p>
+        </div>
+      </header>
+
+      <div class="collage">
+        <figure class="shot shot--1" data-reveal="clip">
+          <div class="shot__in" data-parallax="0.1"><Picture img={studio1} sizes="(min-width: 900px) 58vw, 100vw" /></div>
+        </figure>
+        <figure class="shot shot--2" data-reveal="clip" data-delay=".15">
+          <div class="shot__in" data-parallax="0.14"><Picture img={craft} sizes="(min-width: 900px) 33vw, 80vw" /></div>
+        </figure>
+        <figure class="shot shot--3" data-reveal="clip">
+          <div class="shot__in" data-parallax="0.12"><Picture img={studio3} sizes="(min-width: 900px) 40vw, 80vw" /></div>
+        </figure>
+        <figure class="shot shot--4" data-reveal="clip" data-delay=".15">
+          <div class="shot__in" data-parallax="0.1"><Picture img={studio2} sizes="(min-width: 900px) 48vw, 100vw" /></div>
+        </figure>
+      </div>
+
+      <figure class="studio__quote">
+        <span class="pull__mark" aria-hidden="true">“</span>
+        <blockquote class="studio__quote-text display"><p data-split="lines">We designed the studio to feel like an artist’s <span class="nb">space —</span> not a factory. Every client, every case, every smile deserves space, focus, and care.</p></blockquote>
+        <figcaption class="pull__cite" data-reveal="fade" data-delay=".2">Visual Dental Arts</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about { position: relative; }
+  .block { position: relative; isolation: isolate; background: var(--bg); color: var(--fg); }
+  .block--story { padding-top: var(--section-y); padding-bottom: calc(var(--section-y) * 0.55); }
+  .block--founders { padding-top: calc(var(--section-y) * 0.45); padding-bottom: var(--section-y); }
+  .block--manifesto { padding-block: calc(var(--section-y) * 1.1); }
+  .block--studio { padding-top: var(--section-y); padding-bottom: calc(var(--section-y) * 0.6); }
+
+  /* ---------- (a) story ---------- */
+  .story { display: grid; row-gap: clamp(36px, 5vw, 72px); }
+  .story__title { font-size: clamp(2.7rem, 0.4rem + 11.5vw, 8rem); line-height: 0.94; letter-spacing: -0.02em; }
+  .stair { display: block; }
+  .stair:nth-child(2) { margin-left: 0.35em; color: var(--stroke); }
+  .stair:nth-child(3) { margin-left: 0.7em; }
+  /* "precision rule": a measuring scale (minor ticks every 2 %, major every 10 %); about.js wipes it in from the left */
+  .story__rule {
+    height: 14px; color: var(--stroke); opacity: 0.7; border-right: 1px solid currentColor;
+    background:
+      linear-gradient(currentColor, currentColor) 0 100% / 100% 1px no-repeat,
+      linear-gradient(to right, currentColor 1px, transparent 0) 0 100% / 10% 100% round no-repeat,
+      linear-gradient(to right, currentColor 1px, transparent 0) 0 100% / 2% 36% round no-repeat;
+  }
+  .story__lead .lead { color: var(--fg); max-width: 34ch; }
+  .story__body { max-width: 52ch; color: var(--muted); }
+  .story__philosophy { font-size: clamp(1.7rem, 1rem + 2.5vw, 3.2rem); line-height: 1.1; max-width: 32ch; }
+  .story__philosophy :global(em) { color: var(--stroke); }
+
+  /* ---------- (b) founders ---------- */
+  .founders__label { display: flex; align-items: center; gap: 24px; margin-bottom: 1.6rem; }
+  .founders__label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+  .founders { display: grid; gap: clamp(56px, 8vw, 96px); }
+  .founder { display: grid; gap: 28px; align-content: start; min-width: 0; }
+  .portrait {
+    position: relative; margin: 0; overflow: hidden; aspect-ratio: 4 / 5;
+    background: color-mix(in srgb, var(--stroke) 11%, var(--bg)); /* both headshots multiply onto this one warm tile */
+  }
+  .portrait :global(img) { mix-blend-mode: multiply; }
+  .founder__name { font-size: var(--step-3); }
+  .founder__role { margin-top: 0.9rem; font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; line-height: 1.4; color: var(--stroke); }
+  .founder__bio { margin-top: 1.25rem; max-width: 46ch; color: var(--muted); }
+
+  .nb { white-space: nowrap; } /* keeps the dash on its word's line; a plain nbsp is lost when SplitText wraps each word, so the split and the reverted text wrapped differently */
+  .pull { display: grid; margin: clamp(80px, 10vw, 150px) 0 0; }
+  .pull__mark { font-family: var(--font-display); font-size: clamp(5rem, 9vw, 9rem); line-height: 0.7; height: 0.45em; color: var(--stroke); }
+  .pull__text { margin: 0; font-size: clamp(1.9rem, 1rem + 3vw, 3.6rem); line-height: 1.08; max-width: 24ch; }
+  .pull__text :global(em) { color: var(--stroke); }
+  .pull__cite { margin-top: 1.6rem; display: flex; align-items: center; gap: 1rem; font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
+  .pull__cite::before { content: ''; width: 40px; height: 1px; background: var(--stroke); }
+
+  /* ---------- (c) manifesto ---------- */
+  .manifesto { font-size: clamp(2.9rem, 0.6rem + 9.4vw, 9rem); line-height: 0.98; letter-spacing: -0.02em; margin: 0; }
+  .manifesto :global(em) { color: var(--stroke); }
+  .manifesto__sig { display: flex; align-items: center; gap: clamp(14px, 3vw, 32px); margin-top: clamp(40px, 6vw, 88px); font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
+  .manifesto__sig > span:not(.manifesto__track) { flex: none; }
+  .manifesto__track { position: relative; flex: 1 1 40px; height: 1px; background: var(--line); }
+  .manifesto__track i { position: absolute; inset: 0; background: var(--stroke); transform-origin: 0 50%; }
+  @media (max-width: 599px) { .manifesto__sig { flex-wrap: wrap; row-gap: 12px; } .manifesto__track { order: -1; flex-basis: 100%; margin-bottom: 8px; } }
+
+  /* ---------- (d) studio ---------- */
+  .studio__head { display: grid; gap: 32px; }
+  .studio__title h3 { font-size: clamp(2.6rem, 1.2rem + 5vw, 5.6rem); line-height: 0.98; }
+  .studio__where { display: inline-flex; align-items: center; gap: 0.6rem; margin-top: 1.5rem; font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--stroke); }
+  .studio__wave { display: block; width: 168px; height: 16px; margin-top: 14px; color: var(--stroke); }
+  .studio__first { font-size: var(--step-1); line-height: 1.45; }
+  .studio__copy p + p { color: var(--muted); }
+
+  .collage { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; margin-top: clamp(56px, 8vw, 112px); }
+  .shot { position: relative; overflow: hidden; margin: 0; background: var(--surface); min-width: 0; }
+  .shot__in { position: absolute; inset: 0; }
+  :global(html.is-desktop-fx) .shot__in { inset: -12% 0; } /* taller than its frame only where the engine runs parallax */
+  .shot--1 { grid-column: 1 / -1; aspect-ratio: 16 / 10; }
+  .shot--2 { grid-column: 3 / -1; aspect-ratio: 4 / 5; }
+  .shot--3 { grid-column: 1 / span 5; aspect-ratio: 4 / 3; }
+  .shot--4 { grid-column: 1 / -1; aspect-ratio: 16 / 10; }
+  .shot--4 :global(img) { object-position: 35% 50%; }
+
+  .studio__quote { display: grid; margin: clamp(64px, 8vw, 128px) 0 0; }
+  .studio__quote-text { margin: 0; font-size: clamp(1.6rem, 1rem + 2vw, 2.8rem); line-height: 1.12; font-style: italic; max-width: 30ch; }
+
+  /* ---------- tablet and up ---------- */
+  @media (min-width: 700px) {
+    .stair:nth-child(2) { margin-left: 0.7em; }
+    .stair:nth-child(3) { margin-left: 1.4em; }
+    .founders { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(28px, 6vw, 96px); align-items: start; }
+    .founder--jack { margin-top: clamp(48px, 9vw, 140px); }
+  }
+
+  /* ---------- desktop ---------- */
+  @media (min-width: 900px) {
+    .story { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; }
+    .story__head, .story__rule { grid-column: 1 / -1; }
+    .story__lead { grid-column: 1 / span 5; }
+    .story__body { grid-column: 7 / span 6; padding-top: 0.5em; }
+    .story__philosophy { grid-column: 3 / -1; }
+
+    .founders { column-gap: 24px; grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .founder--ola { grid-column: 1 / span 5; }
+    .founder--jack { grid-column: 8 / span 5; }
+    .pull, .studio__quote { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; }
+    .pull > * { grid-column: 3 / span 9; }
+    .studio__quote > * { grid-column: 5 / span 8; }
+
+    .studio__head { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: end; }
+    .studio__title { grid-column: 1 / span 6; }
+    .studio__copy { grid-column: 8 / span 5; }
+
+    .collage { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; align-items: start; }
+    .shot--1 { grid-column: 1 / span 7; grid-row: 1; aspect-ratio: 3 / 2; }
+    .shot--2 { grid-column: 9 / span 4; grid-row: 1; aspect-ratio: 4 / 5; margin-top: clamp(40px, 7vw, 110px); }
+    .shot--3 { grid-column: 8 / span 5; grid-row: 2; aspect-ratio: 4 / 3; margin-top: clamp(24px, 5vw, 72px); }
+    .shot--4 { grid-column: 1 / span 6; grid-row: 2; aspect-ratio: 3 / 2; }
+  }
+</style>
+
+<script>
+  import '../../scripts/about.js';
+</script>

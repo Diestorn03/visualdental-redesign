@@ -1,0 +1,42 @@
+---
+/*
+  Floating contact: a "Send a case" pill plus a round call button (>= 768 px), a bottom bar with "Call" and "Send a case" below that.
+  It appears once the hero has gone and hides while #contact, the footer or any [data-fab-hide] block is on screen. It takes the theme of
+  the block behind it. Without JS it simply stays visible. Logic: src/scripts/chrome.js. The bar's height is --bar-h (also read by the footer).
+*/
+import Button from '../ui/Button.astro';
+import Icon from '../ui/Icon.astro';
+import { cta, contact } from '../../data/site.js';
+---
+<div class="fab" data-fab data-theme="dark">
+  <a class="fab__call" href={contact.phoneHref} aria-label={`Call ${contact.phoneDisplay}`}><Icon name="phone" size={20} /><span class="fab__call-l" aria-hidden="true">Call</span></a>
+  <Button class="fab__case" href={cta.href} size="lg" icon="arrow-right" data-topic="new-case">{cta.label}</Button>
+</div>
+
+<script>
+  import '../../scripts/chrome.js';
+</script>
+
+<style is:global>
+  :root { --bar-h: 72px; }
+</style>
+
+<style>
+  .fab { position: fixed; z-index: var(--z-fab); right: max(var(--gutter), env(safe-area-inset-right)); bottom: max(24px, env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 10px; transition: opacity 0.5s var(--ease-out), transform 0.7s var(--ease-out), visibility 0s linear 0s; }
+  .fab :global(.btn) { border-radius: var(--r-pill); box-shadow: 0 12px 32px -14px rgb(0 0 0 / 0.55); }
+  .fab__call { display: grid; place-items: center; width: 56px; height: 56px; border-radius: var(--r-pill); background: var(--bg); color: var(--stroke); border: 1px solid var(--stroke); box-shadow: 0 12px 32px -14px rgb(0 0 0 / 0.55); transition: background-color var(--d-base) var(--ease-out), color var(--d-base) var(--ease-out); }
+  .fab__call:hover { background: var(--stroke); color: var(--bg); }
+  .fab__call-l { display: none; }
+
+  /* hidden until the hero has gone (only when JS runs, so the page never loses its contact buttons) */
+  :global(html.js) .fab:not(.is-shown) { opacity: 0; visibility: hidden; transform: translateY(20px); transition: opacity 0.4s var(--ease-out), transform 0.5s var(--ease-out), visibility 0s linear 0.5s; }
+
+  @media (max-width: 767px) {
+    .fab { inset: auto 0 0 0; display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg) 88%, transparent); border-top: 1px solid var(--line); -webkit-backdrop-filter: blur(16px) saturate(140%); backdrop-filter: blur(16px) saturate(140%); }
+    .fab :global(.btn) { border-radius: var(--radius); box-shadow: none; min-height: 52px; padding-inline: 1rem; letter-spacing: 0.18em; }
+    .fab__call { display: inline-flex; gap: 0.6rem; width: auto; height: 52px; border-radius: var(--radius); box-shadow: none; font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; }
+    .fab__call-l { display: inline; }
+    :global(html.js) .fab:not(.is-shown) { transform: translateY(100%); }
+  }
+  :global(html.is-lite) .fab { -webkit-backdrop-filter: none; backdrop-filter: none; }
+</style>
