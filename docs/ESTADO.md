@@ -1,5 +1,10 @@
 # ESTADO · Handoff para retomar (2026-10-01, ~12:57)
 
+## Publicado (15:25)
+- Repo: https://github.com/Diestorn03/visualdental-redesign (público, rama `main`).
+- Sitio: https://diestorn03.github.io/visualdental-redesign/. Modo propuesta: noindex y selector de paletas. Pages se publica con GitHub Actions en cada push a `main`.
+- Para pasar a producción: variable de repositorio `PUBLIC_DEMO=off` y, si hay dominio propio, quitar `PAGES_BASE` en `deploy.yml`.
+
 ## Actualización 15:10: integración terminada
 - El workflow `wf_8cff4377-ecd` completó fundación, medios, las 8 secciones y la integración. El sitio está montado, el build es limpio y la verificación está en `docs/QA-INTEGRACION.md`. Cómo correrlo, las dos paletas, el deploy y los pendientes del cliente están en `README.md`.
 - Las páginas de kit se borraron. `tools/qa/walk.mjs` y `tools/qa/sheet.py` son nuevos.
