@@ -71,7 +71,8 @@ Auditoría hecha el 2026-10-01 sobre visualdentalarts.com (Duda). El detalle est
 |---|---|---|
 | Hero | El molar low-poly se dibuja (DrawSVG) y se funde con la foto macro. El H1 entra por líneas | Malla completa y estática |
 | About | Retratos B/N con revelado por `clip-path`, manifiesto que se ilumina palabra a palabra con el scroll, estudio con parallax suave | Todo visible, manifiesto iluminado |
-| Services | Índice 01–06. Al pasar el puntero o enfocar una fila, su foto o loop aparece en un panel que sigue al cursor | Foto en línea bajo cada fila |
+| Services | Índice 01–06. La foto de la fila activa queda anclada (sticky) a la derecha; la fila activa cambia con hover, foco o scroll | Foto en línea bajo cada fila |
+| Digital | Ventana de planificación tipo exocad: un implante 3D (three.js, procedural) recorre 6 pasos al ritmo del scroll, con cortes CBCT (axial, sagital, coronal) y rótulos que siguen a la pieza. Arrastrar gira el modelo. Detalle en [docs/DIGITAL.md](docs/DIGITAL.md) | Póster (`public/media/digital-poster-<w>.{avif,webp,jpg}`) y los seis pasos en lista |
 | Process | **La única escena fijada**: foto fija y pasos STEP 01 → 02 → 03 → RESULT con wipe antes/después. En el paso 2 se dibuja un wireframe sobre el modelo CAD | Lista vertical con las 4 imágenes |
 | Education | Foto macro con 6 anotaciones manuscritas que se dibujan con el scroll | Foto con marcadores y leyenda numerada |
 | Stories | Cita por líneas, 6 videos de YouTube con facade (el iframe carga al hacer clic, `youtube-nocookie.com`) y tira de IG en marquesina con pausa | Tira con scroll nativo |
@@ -80,7 +81,9 @@ Auditoría hecha el 2026-10-01 sobre visualdentalarts.com (Duda). El detalle est
 - **Lenis, parallax y el pin solo corren con `(min-width: 768px) and (pointer: fine)`** y sin movimiento reducido. En móvil y táctil todo es scroll nativo.
 - **Movimiento reducido:** lo respeta el sistema operativo (`prefers-reduced-motion`) **y** el interruptor "Reduce motion" del footer (`aria-pressed`, se recuerda en `localStorage` como `vd-calm`). Al activarlo o al cruzar 768 px, el motor recarga y devuelve al lector a la misma posición.
 - **Sin JavaScript** todo es legible: el formulario muestra el teléfono y el email, el menú pasa a marca más botón y los videos son enlaces a YouTube.
-- Solo se animan `transform`, `opacity`, `clip-path` y `stroke-dashoffset`. Sin WebGL, partículas ni cursor propio. La API completa del motor (atributos `data-reveal`, `data-split`, `data-lit`, `data-parallax`, `data-draw`, `data-count`, `onPage`, `env`) está en la cabecera de [src/scripts/engine.js](src/scripts/engine.js).
+- Solo se animan `transform`, `opacity`, `clip-path` y `stroke-dashoffset`. WebGL solo en `#digital` (three.js se carga aparte, con `import()`, y se construye cuando la página está quieta). Sin partículas ni cursor propio.
+- **`?digital=3d`** fuerza la escena 3D en dispositivos de bajo consumo (≤ 4 núcleos y ≤ 4 GB, o Save-Data), que por defecto muestran el póster. Con movimiento reducido siempre se ve el póster. Si el build no encuentra `public/media/digital-poster-<w>.*`, usa un cuadro fijo de la escena; si se regenera con otro ancho, `Digital.astro` lo descubre solo.
+- Política de scroll (la dueña es `src/scripts/engine.js`): nada anima alturas tras la carga, solo el motor llama a `ScrollTrigger.refresh()` (las secciones usan `onRefresh`), y Lenis y ScrollTrigger van integrados como en la documentación oficial. La API completa del motor (atributos `data-reveal`, `data-split`, `data-lit`, `data-parallax`, `data-draw`, `data-count`, `onPage`, `env`) está en la cabecera de [src/scripts/engine.js](src/scripts/engine.js).
 
 ## Estructura
 
@@ -90,9 +93,9 @@ src/
   layouts/Base.astro   head, fuentes, JSON-LD, script de paleta, skip link, chrome
   components/
     chrome/         Header, Footer, ContactFab, PaletteSwitch, Logo
-    sections/       Hero, About, Services, Recipe, Anatomy, Stories, Faq, Contact
+    sections/       Hero, About, Services, Digital, Recipe, Anatomy, Stories, Faq, Contact
     ui/             Picture (AVIF/WebP/JPG), Button, Icon
-  scripts/          engine.js (GSAP + Lenis) y un módulo por sección
+  scripts/          engine.js (GSAP + Lenis) y un módulo por sección; digital/ (escena 3D y cortes CBCT)
   data/             site.js (contacto, nav, demo) y media.js (generado)
   styles/           tokens.css y base.css
   lib/url.js        url() y asset(): lo único que lee BASE_URL
@@ -100,8 +103,9 @@ public/             media/ (imágenes y loops) y brand/ (marca, favicons, og.jpg
 tools/
   media/            curaduría y export de imágenes (Python + ffmpeg)
   svg/              generador de la malla del hero
-  qa/               shoot, walk, audit, perf-section, sheet
-docs/               BRIEF, CONCEPTO, CONTENT, MEDIA, STACK-PLAYBOOK, QA-INTEGRACION
+  qa/               shoot, walk, audit, perf-section, sheet; probes/ = sondas CDP de fluidez (scroll con rueda real, jank, A/B por sección)
+  digital/          póster de la escena 3D (export-poster.py) y sondas de #digital
+docs/               BRIEF, CONCEPTO, CONTENT, DIGITAL, MEDIA, STACK-PLAYBOOK, QA-INTEGRACION
 ```
 
 Las imágenes se regeneran con `python tools/media/build.py` (añade `--loops` para recodificar los videos) y `node tools/media/verify.mjs` comprueba que todo lo referenciado existe. Salen de `insumos/` (no va a git: videos y reels pesan unos 440 MB). Detalle de cada recorte en [docs/MEDIA.md](docs/MEDIA.md).

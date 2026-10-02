@@ -1,0 +1,24 @@
+---
+// d1 lab page (delete when done): ?p=0.5 sets progress; ?lite=1; ?reduced=1; window.__scene for probes.
+---
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>lab digital scene</title><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>html,body{margin:0;background:#0d1117;color:#ccc;font:12px/1.3 system-ui;height:100%}#wrap{position:fixed;inset:0}canvas{width:100%;height:100%;display:block}
+#hud{position:fixed;left:12px;bottom:10px;display:flex;gap:10px;align-items:center;z-index:2}#hud input{width:420px}.pt{position:fixed;width:9px;height:9px;margin:-5px 0 0 -5px;border:1px solid #d4a373;border-radius:50%;pointer-events:none;z-index:3;font-size:10px;color:#d4a373;white-space:nowrap}</style></head>
+<body><div id="wrap"><canvas id="c"></canvas></div>
+<div id="hud"><input id="s" type="range" min="0" max="1" step="0.001" value="0"><span id="v">0</span></div>
+<script>
+  import { createScene } from '../../scripts/digital/scene.js';
+  const q = new URLSearchParams(location.search);
+  const c = document.getElementById('c');
+  const sc = await createScene(c, { reduced: q.has('reduced'), lite: q.has('lite'), dpr: q.has('dpr') ? +q.get('dpr') : devicePixelRatio, gizmo: !q.has('nogizmo') });
+  window.__scene = sc; sc.resize(); sc.start();
+  const hud = q.get('hud') !== '0'; const set = (p, imm) => { sc.setProgress(p, imm !== false && !window.__live); if (hud) { document.getElementById('v').textContent = (+p).toFixed(3); document.getElementById('s').value = p; } };
+  window.__set = set; set(+(q.get('p') || 0));
+  document.getElementById('s').oninput = (e) => set(+e.target.value);
+  if (q.get('hud') === '0') document.getElementById('hud').style.display = 'none';
+  addEventListener('resize', () => sc.resize());
+  const names = ['crown', 'implantTip', 'axisTop', 'abutment'], els = names.map((n) => { const d = document.createElement('div'); d.className = 'pt'; d.textContent = n; document.body.appendChild(d); return d; });
+  if (q.has('pts')) (function f() { names.forEach((n, i) => { const o = sc.project(n); els[i].style.display = o.visible ? '' : 'none'; els[i].style.left = o.x + 'px'; els[i].style.top = o.y + 'px'; }); requestAnimationFrame(f); })();
+  else els.forEach((e) => (e.style.display = 'none'));
+</script></body></html>

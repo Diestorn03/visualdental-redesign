@@ -102,7 +102,7 @@ const { ola, jack, studio1, studio2, studio3, craft } = media.about;
 
       <div class="collage">
         <figure class="shot shot--1" data-reveal="clip">
-          <div class="shot__in" data-parallax="0.1"><Picture img={studio1} sizes="(min-width: 900px) 58vw, 100vw" /></div>
+          <div class="shot__in" data-parallax="0.1"><Picture img={studio1} sizes="(min-width: 1336px) 713px, (min-width: 900px) 58vw, 100vw" /></div>
         </figure>
         <figure class="shot shot--2" data-reveal="clip" data-delay=".15">
           <div class="shot__in" data-parallax="0.14"><Picture img={craft} sizes="(min-width: 900px) 33vw, 80vw" /></div>
@@ -161,6 +161,7 @@ const { ola, jack, studio1, studio2, studio3, craft } = media.about;
     background: color-mix(in srgb, var(--stroke) 11%, var(--bg)); /* both headshots multiply onto this one warm tile */
   }
   .portrait :global(img) { mix-blend-mode: multiply; }
+  .portrait { isolation: isolate; } /* the multiply blends inside the tile only; without it the whole (isolated) block is the backdrop and every raster copies it */
   .founder__name { font-size: var(--step-3); }
   .founder__role { margin-top: 0.9rem; font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; line-height: 1.4; color: var(--stroke); }
   .founder__bio { margin-top: 1.25rem; max-width: 46ch; color: var(--muted); }
@@ -176,6 +177,7 @@ const { ola, jack, studio1, studio2, studio3, craft } = media.about;
   /* ---------- (c) manifesto ---------- */
   .manifesto { font-size: clamp(2.9rem, 0.6rem + 9.4vw, 9rem); line-height: 0.98; letter-spacing: -0.02em; margin: 0; }
   .manifesto :global(em) { color: var(--stroke); }
+  :global(html.is-desktop-fx) .manifesto :global(.lit-word) { will-change: opacity; } /* each word is a layer: the scrubbed fade is a compositor opacity change, the 9rem type is not re-rastered per frame */
   .manifesto__sig { display: flex; align-items: center; gap: clamp(14px, 3vw, 32px); margin-top: clamp(40px, 6vw, 88px); font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
   .manifesto__sig > span:not(.manifesto__track) { flex: none; }
   .manifesto__track { position: relative; flex: 1 1 40px; height: 1px; background: var(--line); }
@@ -193,7 +195,7 @@ const { ola, jack, studio1, studio2, studio3, craft } = media.about;
   .collage { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; margin-top: clamp(56px, 8vw, 112px); }
   .shot { position: relative; overflow: hidden; margin: 0; background: var(--surface); min-width: 0; }
   .shot__in { position: absolute; inset: 0; }
-  :global(html.is-desktop-fx) .shot__in { inset: -12% 0; } /* taller than its frame only where the engine runs parallax */
+  :global(html.is-desktop-fx) .shot__in { inset: -12% 0; will-change: transform; } /* taller than its frame only where the engine runs parallax; own layer: the drift is compositor-only */
   .shot--1 { grid-column: 1 / -1; aspect-ratio: 16 / 10; }
   .shot--2 { grid-column: 3 / -1; aspect-ratio: 4 / 5; }
   .shot--3 { grid-column: 1 / span 5; aspect-ratio: 4 / 3; }

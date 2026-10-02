@@ -4,7 +4,7 @@
   Videos: without JS each frame is a link to YouTube. stories.js swaps it for a real <button> ("Play video: …") that replaces the
   thumbnail with a youtube-nocookie iframe on click (one video plays at a time).
   Strip: a native horizontal scroll row by default (no JS, reduced motion / "Reduce motion" switch). stories.js turns it into a slow
-  CSS marquee (cloned set is inert) that pauses on hover, on focus and with the Pause toggle (aria-pressed).
+  CSS marquee (cloned set is inert). Pausing (off screen, hover, focus, Pause toggle) is done in stories.js with the Web Animations API.
 */
 import Picture from '../ui/Picture.astro';
 import Button from '../ui/Button.astro';
@@ -21,6 +21,14 @@ const videos = [
   { id: 'cpuyUuM52s8', title: 'Breaking Free from Painful Veneer Procedures: A Real Patient Success Story', time: '6:56' },
   { id: '4_Bn42aDvnQ', title: 'A Story of Compassionate Family Dentistry with Dr. Miranda Cornejo', time: '6:03' },
 ];
+// `sizes` = the real hole, so the browser does not fetch 960 px for a 392 px card. Container = min(1240px, 100vw - 2 gutters); 3 cols from 1024 (the lead takes 2),
+// 2 cols from 640 (lead and last card take both), 1 col below; 1336px is where the container stops growing. Remeasure if the grid or --gutter change.
+const sizes = {
+  lead: '(min-width: 1336px) 816px, (min-width: 1024px) 61vw, 92vw',
+  card: '(min-width: 1336px) 392px, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 92vw',
+  last: '(min-width: 1336px) 392px, (min-width: 1024px) 30vw, 92vw',
+  ig: 'clamp(148px, 17vw, 232px)', // = --card-w
+};
 const iso = (t: string) => { const [m, s] = t.split(':'); return `PT${+m}M${+s}S`; };
 const pad = (n: number) => String(n).padStart(2, '0');
 ---
@@ -51,7 +59,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
           <div class="vid__frame">
             <Picture
               img={media.stories[v.id]}
-              sizes={i === 0 ? '(min-width: 1024px) 66vw, 100vw' : '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'}
+              sizes={i === 0 ? sizes.lead : i === videos.length - 1 ? sizes.last : sizes.card}
             />
             <span class="vid__mark" aria-hidden="true"><span><Icon name="play" size={26} stroke={1.5} /></span></span>
             <time class="vid__dur num" datetime={iso(v.time)}>{v.time}</time>
@@ -84,7 +92,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
           {media.ig.map((f) => (
             <li class="strip__item">
               <a class="ig-card" href={f.href} target="_blank" rel="noopener noreferrer">
-                <Picture img={f} sizes="(min-width: 1024px) 232px, 17vw" />
+                <Picture img={f} sizes={sizes.ig} />
                 <span class="ig-card__ig" aria-hidden="true"><Icon name="instagram" size={20} /></span>
                 <span class="ig-card__go" aria-hidden="true"><Icon name="arrow-up-right" size={18} /></span>
                 <span class="sr-only"> (Instagram reel, opens in a new tab)</span>
@@ -124,7 +132,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
   /* ---------- videos ---------- */
   .vids { list-style: none; display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(40px, 4.5vw, 64px) var(--gap); margin: clamp(80px, 10vw, 152px) 0 0; padding: 0; }
   .vid { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
-  .vid__frame { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--radius); background: var(--fg); isolation: isolate; }
+  /* Photo frames are square-cornered (they were --radius, 2px): an overflow clip with a radius puts a rounded-rect clip on every draw inside it (image, shade, play mark, badge,
+     icons), and each combination is its own GPU shader program. Cold, in this section that was ~10 programs and 230-300 ms of D3D compiles, i.e. the 60-260 ms frame drops while
+     scrolling (trace: GrShaderCache miss -> ProgramD3D::link -> D3DCompile in the raster flush). Without the radius: 4 programs, 70-100 ms. At 2px nobody can tell. */
+  .vid__frame { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--fg); isolation: isolate; }
   .vid__frame :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; transition: transform 1.4s var(--ease-out); }
   .vid__frame::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(to top, color-mix(in srgb, var(--fg) 50%, transparent), transparent 45%); }
   .vid__frame :global(iframe) { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; border: 0; background: var(--fg); }
@@ -186,7 +197,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
   .strip__item { flex: none; width: var(--card-w); scroll-snap-align: start; }
   .strip__item:nth-child(even) { margin-top: clamp(20px, 3vw, 44px); } /* staggered rhythm */
 
-  .ig-card { position: relative; display: block; aspect-ratio: 9 / 16; overflow: hidden; border-radius: var(--radius); background: var(--fg); isolation: isolate; }
+  .ig-card { position: relative; display: block; aspect-ratio: 9 / 16; overflow: hidden; background: var(--fg); isolation: isolate; } /* square for the same reason as .vid__frame */
   .ig-card :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; transition: transform 1.4s var(--ease-out); }
   .ig-card::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, color-mix(in srgb, var(--fg) 55%, transparent), transparent 38%); }
   .ig-card__ig { position: absolute; left: 12px; bottom: 12px; z-index: 1; display: grid; color: var(--bg); }
@@ -201,13 +212,16 @@ const pad = (n: number) => String(n).padStart(2, '0');
   .strip__foot { margin-top: clamp(24px, 3vw, 40px); }
 
   /* marquee mode (stories.js: motion allowed). Only transform animates; the second, inert set makes the loop seamless. */
-  .strip.is-marquee .strip__view { overflow: clip; padding-inline: 0; scroll-snap-type: none; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+  .strip.is-marquee .strip__view { position: relative; overflow: clip; padding-inline: 0; scroll-snap-type: none; }
+  /* Edge fade = two flat-colour gradients over the strip (the section background is a flat var(--bg)), NOT mask-image: a mask makes an offscreen surface that is redrawn on every
+     frame the loop moves and costs extra first-use shader programs (measured cold: 1-3 fewer programs, no per-frame mask pass). */
+  .strip.is-marquee .strip__view::before, .strip.is-marquee .strip__view::after { content: ''; position: absolute; inset-block: 0; z-index: 2; width: 8%; pointer-events: none; }
+  .strip.is-marquee .strip__view::before { left: 0; background: linear-gradient(90deg, var(--bg), transparent); }
+  .strip.is-marquee .strip__view::after { right: 0; background: linear-gradient(270deg, var(--bg), transparent); }
   .strip.is-marquee .strip__set { padding-right: var(--card-gap); }
   .strip.is-marquee .strip__track { margin-left: 8px; animation: strip-slide 90s linear infinite; will-change: transform; } /* 8px: room for the focus ring of the first card */
-  .strip.is-marquee .strip__view:focus-within { -webkit-mask-image: none; mask-image: none; }
-  .strip.is-marquee[data-paused] .strip__track,
-  .strip.is-marquee .strip__view:focus-within .strip__track { animation-play-state: paused; }
-  @media (hover: hover) { .strip.is-marquee .strip__view:hover .strip__track { animation-play-state: paused; } }
+  .strip.is-marquee .strip__view:has(:focus-visible)::before, .strip.is-marquee .strip__view:has(:focus-visible)::after { display: none; } /* keyboard focus: the ring needs the edge. Not :focus-within: a mouse click leaves the link focused */
+  /* pausing (Pause button, off screen, hover, focus) is done by stories.js through the Web Animations API: a CSS animation-play-state was ignored at random */
   @keyframes strip-slide { to { transform: translate3d(-50%, 0, 0); } }
 </style>
 

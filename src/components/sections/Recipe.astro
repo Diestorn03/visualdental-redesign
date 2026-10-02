@@ -4,6 +4,7 @@
     · list (touch, mobile, reduced motion, no JS): a vertical list, each step with its image; data-reveal / data-draw from the engine.
     · desktop (fine pointer, >= 768 px, not reduced): src/scripts/recipe.js adds .rc--pin, pins .rc__stage (the only pinned scene of the
       site) and scrubs one timeline: clip-path wipe between photos (before | after, with a seam line), copy swap, progress, wireframe draw.
+  Layout is decided before first paint by the inline script below (.rc--pin + .rc--hold), not by recipe.js after load.
   Copy: docs/CONTENT.md §4. Images: media.recipe.* (all 4:3, so the wire overlay shares the image's coordinate space).
 */
 import Picture from '../ui/Picture.astro';
@@ -44,6 +45,19 @@ const wire = {
 };
 ---
 <section id="process" data-theme="dark" class="rc section" aria-labelledby="process-title">
+  <script is:inline>
+    /* Decide the layout before first paint (same gate as the engine's env.desktop + a viewport tall enough for the scene). Pinned mode = stage + the
+       pin run (2.5 viewports, the same Math.round recipe.js hands ScrollTrigger); .rc--hold keeps that run as padding until recipe.js lets the pin
+       spacer take it over, so the page height never changes after load (P1). Without this the pin mounted ~0.5 s after load and pushed everything
+       below it down by 150 to 1100 px. */
+    (function () {
+      var d = document.documentElement, s = document.currentScript.parentElement;
+      if (innerHeight < 520 || !matchMedia('(min-width: 768px) and (pointer: fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches || d.classList.contains('calm')) return;
+      s.classList.add('rc--pin', 'rc--hold');
+      s.style.setProperty('--rc-run', Math.round(innerHeight * 2.5) + 'px');
+      setTimeout(function () { if (!d.classList.contains('fx-booted')) s.classList.remove('rc--pin', 'rc--hold'); }, 3500); /* engine never booted: back to the plain list */
+    })();
+  </script>
   <div class="container rc__head">
     <p class="eyebrow" data-reveal="up">How we work</p>
     <h2 id="process-title" class="display" data-split="lines">From the <em>first line</em> to the <em>final glaze</em>.</h2>
@@ -62,22 +76,24 @@ const wire = {
             </div>
             <div class="rc__fig">
               <div class="rc__frame" data-reveal="clip">
-                <Picture
-                  img={s.img}
-                  sizes="(min-width: 1280px) 720px, (min-width: 768px) 56vw, calc(100vw - 32px)"
-                />
-                {s.wire && (
-                  <>
-                    <span class="rc__scrim" aria-hidden="true"></span>
-                    <svg class="rc__wire" viewBox="0 0 1280 960" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-draw data-delay=".5">
-                      {wire.axes.map((d) => <path d={d} />)}
-                      {wire.brackets.map((d) => <path d={d} />)}
-                      {wire.mesh.map((d, k) => <path d={d} class={k > 1 ? 'is-fine' : undefined} />)}
-                      <circle cx="368" cy="535" r="8" />
-                      {wire.nodes.map(([cx, cy]) => <circle cx={cx} cy={cy} r="3" />)}
-                    </svg>
-                  </>
-                )}
+                <div class="rc__in">
+                  <Picture
+                    img={s.img}
+                    sizes="(min-width: 1280px) 720px, (min-width: 768px) 56vw, calc(100vw - 32px)"
+                  />
+                  {s.wire && (
+                    <>
+                      <span class="rc__scrim" aria-hidden="true"></span>
+                      <svg class="rc__wire" viewBox="0 0 1280 960" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-draw data-delay=".5">
+                        {wire.axes.map((d) => <path d={d} />)}
+                        {wire.brackets.map((d) => <path d={d} />)}
+                        {wire.mesh.map((d, k) => <path d={d} class={k > 1 ? 'is-fine' : undefined} />)}
+                        <circle cx="368" cy="535" r="8" />
+                        {wire.nodes.map(([cx, cy]) => <circle cx={cx} cy={cy} r="3" />)}
+                      </svg>
+                    </>
+                  )}
+                </div>
               </div>
               {i > 0 && <span class="rc__seam" aria-hidden="true"></span>}
             </div>
@@ -111,6 +127,7 @@ const wire = {
 
   .rc__fig { position: relative; width: 100%; aspect-ratio: 4 / 3; outline: 1px solid var(--line); outline-offset: 8px; }
   .rc__frame { position: absolute; inset: 0; overflow: hidden; background: var(--surface); }
+  .rc__in { position: absolute; inset: 0; } /* pinned scene: the photo layer that counter-slides inside the sliding frame */
   .rc__frame :global(img) { transform-origin: 50% 50%; }
   .rc__scrim { position: absolute; inset: 0; background: linear-gradient(rgb(22 20 20 / 0.5), rgb(22 20 20 / 0.38)); } /* lets the thin lines read on the pale arch, in both palettes */
   .rc__wire { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: none; stroke: var(--stroke); stroke-width: 1px; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
@@ -125,6 +142,7 @@ const wire = {
 
   /* ---------- pinned scene (class added by recipe.js; same gate as the engine's env.desktop) ---------- */
   .rc--pin { padding-bottom: 0; }
+  .rc--hold { padding-bottom: var(--rc-run); } /* from the inline script until recipe.js hands the run to the pin spacer */
   .rc--pin .rc__head { margin-bottom: 0; }
   .rc--pin .rc__stage {
     --rc-top: calc(var(--header-h) + 12px); --rc-bot: 40px; --rc-prog: 44px;
@@ -136,8 +154,12 @@ const wire = {
   .rc--pin .rc__step { grid-area: 1 / 1; gap: var(--rc-gap); min-height: 0; }
   .rc--pin .rc__no { font-size: clamp(4rem, min(10vw, 17svh), 10rem); }
   .rc--pin .rc__fig { width: min(100%, calc(var(--rc-fh) * 4 / 3)); justify-self: end; }
-  .rc--pin .rc__frame { will-change: clip-path; }
-  .rc--pin .rc__frame :global(img) { will-change: transform; }
+  /* Scrubbed frames are compositor-only: every moving piece owns a layer (transform / opacity), so scrolling inside the pin repaints nothing but the
+     wireframe strokes. The fig clips the frames sliding in (overflow clip: a plain rect, no mask surface); the wire has its own layer so the
+     DrawSVG strokes never re-raster the photo. */
+  .rc--pin .rc__fig { overflow: clip; }
+  .rc--pin .rc__frame, .rc--pin .rc__in, .rc--pin .rc__frame :global(img), .rc--pin .rc__wire, .rc--pin .rc__seam { will-change: transform; }
+  .rc--pin .rc__txt > *, .rc--pin .rc__bar i { will-change: transform, opacity; }
   .rc--pin .rc__seam { display: block; position: absolute; inset: 0; z-index: 2; opacity: 0; pointer-events: none; }
   .rc--pin .rc__seam::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 1px; background: var(--stroke); box-shadow: 0 0 0 1px rgb(22 20 20 / 0.35); }
   .rc--pin .rc__progress { display: grid; grid-column: 1; grid-row: 1; grid-template-columns: repeat(4, 1fr); gap: 12px; align-self: start; max-width: 30rem; }

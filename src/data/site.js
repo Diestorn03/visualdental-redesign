@@ -43,6 +43,7 @@ export const legal = {
 export const nav = [
   { href: url('#about'), id: 'about', label: 'About' },
   { href: url('#services'), id: 'services', label: 'Services' },
+  { href: url('#digital'), id: 'digital', label: 'Digital' },
   { href: url('#process'), id: 'process', label: 'Process' },
   { href: url('#education'), id: 'education', label: 'Education' },
   { href: url('#stories'), id: 'stories', label: 'Stories' },

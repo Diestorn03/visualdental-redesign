@@ -8,6 +8,11 @@ onPage(({ gsap, env }) => {
   if (!wrap) return;
   if (env.reduced) return;
 
+  // the bloom mask ends fully opaque (its last stop is past the farthest corner): drop it so the photo is not rendered through a mask surface
+  // for the rest of the visit, and the drift below is a plain texture move
+  const photo = root.querySelector('.hero__photo');
+  photo?.addEventListener('animationend', (e) => { if (e.target === photo) photo.style.maskImage = photo.style.webkitMaskImage = 'none'; });
+
   const rest = parseFloat(getComputedStyle(root).getPropertyValue('--mesh-o')) || 0.6;
   const rim = wrap.querySelector('[data-outline]');
   const bands = wrap.querySelectorAll('[data-band]');

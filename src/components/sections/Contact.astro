@@ -132,9 +132,13 @@ const links = [
         ))}
       </ul>
     </div>
-    <figure class="studio__photo" data-reveal="clip">
-      <Picture img={studio} sizes="(min-width: 1000px) 600px, 100vw" position="50% 52%" />
-      <figcaption class="studio__cap num">Beverly Shores, Indiana · 5 min from Lake Michigan</figcaption>
+    {/* photo wipe (top to bottom) = two counter-translated layers animated by contact.js (transform only, composited). It replaces data-reveal="clip":
+        animating clip-path from JS re-rasterised the whole photo every frame (measured: 118 repaints of a 596x447 image per reveal). */}
+    <figure class="studio__photo" data-wipe>
+      <div class="studio__wipe"><div class="studio__fill">
+        <Picture img={studio} sizes="(min-width: 1000px) 600px, 100vw" position="50% 52%" />
+        <figcaption class="studio__cap num">Beverly Shores, Indiana · 5 min from Lake Michigan</figcaption>
+      </div></div>
     </figure>
   </div>
 </section>
@@ -154,7 +158,11 @@ const links = [
   .channel:hover :global(.channel__arrow) { transform: rotate(-90deg) translateX(4px); }
 
   /* ---------- form ---------- */
-  .form { position: relative; display: block; padding: clamp(22px, 4vw, 44px); background: var(--surface); border: 1px solid var(--line); border-top-color: var(--stroke); border-radius: var(--radius); overflow: hidden; }
+  /* One colour all round: a border whose top side differs from the other three (the old accent `border-top-color`) is painted by Chrome as four clipped
+     paths, and the first one makes Skia compile its path shaders inside the raster of the form (cold GPU cache: five shaders, a ~60 ms frame as Contact
+     entered; A/B over a cold pass: 5 -> 0 with a uniform border). The accent hairline is the ::before below instead. */
+  .form { position: relative; display: block; padding: clamp(22px, 4vw, 44px); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; will-change: transform, opacity; } /* the engine's fade-up reveal then never re-rasterises the card */
+  .form::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 1px; background: var(--stroke); pointer-events: none; }
   .form__fields { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.4rem 1.25rem; }
   .field { display: grid; align-content: start; gap: 0.55rem; min-width: 0; }
   .field label { font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; line-height: 1.3; color: var(--muted); transition: color var(--d-fast) var(--ease-out); }
@@ -165,7 +173,10 @@ const links = [
     border: 1px solid color-mix(in srgb, var(--fg) 45%, transparent); border-radius: var(--radius);
     font-size: 1rem; line-height: 1.4; transition: border-color var(--d-fast) var(--ease-out), background-color var(--d-fast) var(--ease-out);
   }
-  .field textarea { min-height: 148px; resize: vertical; }
+  /* resize: none on purpose. The native resize grip is drawn as an anti-aliased PATH, and the first path draw makes Skia compile its path-renderer shaders
+     inside the raster of the form: with a cold GPU shader cache that was the single 140-260 ms frame when Contact entered (A/B over a cold full-page
+     pass: only the textarea's grip, 150-220 ms -> 55-75 ms with `resize: none`). A 5-row message box does not need it. */
+  .field textarea { min-height: 148px; resize: none; }
   .field input:hover, .field select:hover, .field textarea:hover { border-color: color-mix(in srgb, var(--fg) 75%, transparent); }
   .field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible { border-color: var(--stroke); outline-offset: 2px; }
   .field [aria-invalid='true'] { border-color: var(--danger); }
@@ -219,10 +230,16 @@ const links = [
   .studio__links a { display: grid; grid-template-columns: 22px 1fr; align-items: center; gap: 0 1rem; min-height: 56px; padding-block: 0.6rem; }
   .studio__links a :global(.icon) { grid-row: 1 / span 2; }
   .studio__links a :global(.icon) { color: var(--stroke); }
-  .studio__label { font-family: var(--font-label); font-size: var(--step--1); letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
-  .studio__text { min-width: 0; overflow-wrap: anywhere; background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 1px; justify-self: start; transition: background-size var(--d-base) var(--ease-out); }
-  .studio__links a:hover .studio__text { background-size: 100% 1px; }
+  .studio__label { font-family: var(--font-label); font-size: var(--step--1); letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); transition: color var(--d-base) var(--ease-out); }
+  .studio__text { min-width: 0; overflow-wrap: anywhere; background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 1px; justify-self: start; transition: background-size var(--d-base) var(--ease-out), color var(--d-base) var(--ease-out); }
+  .studio__links a:hover .studio__text { background-size: 100% 1px; color: var(--stroke); } /* the rule grows in the accent colour: the row answers the pointer with more than a 1 px line */
+  .studio__links a:hover .studio__label { color: var(--fg); }
   .studio__photo { position: relative; margin: 0; aspect-ratio: 4 / 3; overflow: hidden; background: var(--surface); border-radius: var(--radius); }
+  .studio__wipe, .studio__fill { position: absolute; inset: 0; will-change: transform; } /* own compositor layers: the wipe moves them, nothing is re-rasterised */
+  /* the engine's reveals write opacity/transform from JS on ~15 small blocks at once: without a layer each frame of each one re-rasterises the tiles of the
+     big section layer under it (measured while scrolling #contact: 1100-1400 raster tasks; with these on their own layers a few hundred) */
+  .contact__intro .lead, .channels > li, .studio__info > *, .studio__links > li, :global(#contact .split-line) { will-change: transform, opacity; }
+  .studio__wipe { overflow: hidden; }
   .studio__cap { position: absolute; inset: auto 0 0 0; padding: 2.75rem 1.1rem 1rem; font-size: var(--step--1); letter-spacing: 0.16em; text-transform: uppercase; line-height: 1.4; color: var(--fg); background: linear-gradient(to top, color-mix(in srgb, var(--bg) 85%, transparent), transparent); }
 
   @media (min-width: 560px) {

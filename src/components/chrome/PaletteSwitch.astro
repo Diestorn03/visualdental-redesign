@@ -22,7 +22,7 @@ const options = [['amber', 'Amber'], ['mono', 'Mono']];
 </script>
 
 <style>
-  .pal { position: fixed; z-index: var(--z-ribbon); left: max(12px, env(safe-area-inset-left)); bottom: max(12px, env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 12px; padding: 4px 4px 4px 14px; color: var(--fg); background: color-mix(in srgb, var(--bg) 92%, transparent); border: 1px solid var(--line); border-radius: var(--r-pill); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); transition: transform 0.6s var(--ease-out), opacity 0.4s var(--ease-out); }
+  .pal { position: fixed; z-index: var(--z-ribbon); left: max(12px, env(safe-area-inset-left)); bottom: max(12px, env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 12px; padding: 4px 4px 4px 14px; color: var(--fg); background: color-mix(in srgb, var(--bg) 96%, transparent); border: 1px solid var(--line); border-radius: var(--r-pill); transition: transform 0.6s var(--ease-out), opacity 0.4s var(--ease-out); }
   .pal__tag { font-family: var(--font-label); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
   .pal__seg { position: relative; display: grid; grid-template-columns: 1fr 1fr; border-radius: var(--r-pill); }
   /* sliding thumb: its place follows html[data-palette] */
@@ -35,16 +35,18 @@ const options = [['amber', 'Amber'], ['mono', 'Mono']];
   :global(html:not(.js)) .pal { display: none; } /* it needs JS to do anything */
   @media (max-width: 767px) { :global(html.has-bar) .pal { transform: translateY(calc(-1 * (var(--bar-h, 0px) + env(safe-area-inset-bottom)))); } } /* lifts above the bar; transform, not bottom: no layout shift */
   /* phones: only the switch, and only once the hero is behind (it would cover the first CTA); desktop: bottom centre, clear of the hero's bottom-left tags and the FAB */
-  /* compact by default (two dots, bottom left) so it never covers content; names show on hover/focus, always there for screen readers */
-  .pal { padding: 4px; gap: 0; }
-  .pal button { padding: 0; width: 44px; }
-  .pal__tag, .pal__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  /* compact by default (two dots, bottom left) so it never covers content; the names open on hover/focus, always there for screen readers.
+     It opens with a transition: tag and labels grow from width 0 (interpolate-size) while the paddings and the gap ease in, so the pill widens
+     over --d-base instead of jumping from 98 to 346 px in one frame. Without interpolate-size (Firefox, Safari) the widths simply switch. */
+  .pal { padding: 4px; gap: 0; interpolate-size: allow-keywords; transition: transform 0.6s var(--ease-out), opacity 0.4s var(--ease-out), padding var(--d-base) var(--ease-out), gap var(--d-base) var(--ease-out); }
+  .pal button { padding: 0; gap: 0; transition: color var(--d-base) var(--ease-out), padding var(--d-base) var(--ease-out), gap var(--d-base) var(--ease-out); }
+  .pal__tag, .pal__label { width: 0; overflow: hidden; white-space: nowrap; transition: width var(--d-base) var(--ease-out); } /* still in the accessibility tree */
   @media (hover: hover) and (min-width: 768px) {
     .pal:hover, .pal:focus-within { padding-left: 14px; gap: 12px; }
-    .pal:hover .pal__tag, .pal:focus-within .pal__tag { position: static; width: auto; height: auto; clip-path: none; }
-    .pal:hover button, .pal:focus-within button { width: auto; padding: 0 1rem; }
-    .pal:hover .pal__label, .pal:focus-within .pal__label { position: static; width: auto; height: auto; clip-path: none; }
+    .pal:hover .pal__tag, .pal:focus-within .pal__tag, .pal:hover .pal__label, .pal:focus-within .pal__label { width: auto; }
+    .pal:hover button, .pal:focus-within button { padding: 0 1rem; gap: 0.5rem; }
   }
-  /* hidden over the hero (it would cover the micro-tags on desktop and the first CTA on phones); appears once the hero is behind */
-  :global(html.js:not(.past-hero)) .pal { opacity: 0; visibility: hidden; }
+  /* hidden over the hero (it would cover the micro-tags on desktop and the first CTA on phones; it appears once the hero is behind) and over #contact
+     (it sat on top of the channel and link lines there; the footer reserves room for it). The fade plays out before visibility flips. */
+  :global(html.js:not(.past-hero)) .pal, :global(html.in-contact) .pal { opacity: 0; visibility: hidden; transition: transform 0.6s var(--ease-out), opacity 0.4s var(--ease-out), visibility 0s linear 0.4s; }
 </style>

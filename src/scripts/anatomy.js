@@ -2,12 +2,12 @@
 // Reduced / calm / no JS: nothing is hidden in CSS, so the whole plate is already visible.
 import { onPage } from './engine.js';
 
-onPage(({ gsap, env }) => {
+onPage(({ gsap, env, lenis }) => {
   const root = document.querySelector('#education');
   const stage = root?.querySelector('.plate__stage');
   if (!stage || env.reduced) return;
 
-  const tl = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: stage, start: 'top 70%', end: 'bottom 55%', scrub: 0.7 } });
+  const tl = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: stage, start: 'top 70%', end: 'bottom 55%', scrub: lenis ? true : 0.35 } }); // Lenis already smooths the wheel: a numeric scrub on top is a second lag layer that keeps animating after the scroll stops
   try {
     root.querySelectorAll('.plate__svg [data-g]').forEach((g, i) => {
       const at = i; // one unit of timeline per note

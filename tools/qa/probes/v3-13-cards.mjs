@@ -1,0 +1,32 @@
+// v3-13: video card + IG card hover (what changes, how fast), screenshots idle vs hover.
+import { start, sleep, OUT, docTop } from './v3-lib.mjs';
+const W = 1366, H = 820;
+const b = await start({ w: W, h: H, tag: 'vc', wait: 4000 });
+const J = (o) => JSON.stringify(o);
+await b.evalJs(`document.addEventListener('click', (e) => { if (e.target.closest('a[target=_blank]')) e.preventDefault(); }, true); 0`);
+const top = await docTop(b, '.vids');
+await b.move(5, 5);
+await b.wheelTo(top - 150, W / 2, H / 2, { tol: 30 }); await sleep(2200);
+const f = await b.evalJs(`(() => { const e = document.querySelector('.vid__frame'); const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height, img: getComputedStyle(e.querySelector('img')).transform, mark: getComputedStyle(e.querySelector('.vid__mark > span')).transform, markBg: getComputedStyle(e.querySelector('.vid__mark > span')).backgroundColor, cursor: getComputedStyle(e.querySelector('.vid__hit:not([hidden])') || e).cursor }; })()`);
+console.log('idle', J(f));
+await b.shot('62-video-idle');
+await b.move(f.x, f.y);
+const frames = await b.evalJs(`new Promise((res) => { const e = document.querySelector('.vid__frame'); const out = []; const t0 = performance.now(); const tick = (t) => { out.push([Math.round(t - t0), +new DOMMatrixReadOnly(getComputedStyle(e.querySelector('img')).transform).a.toFixed(4)]); if (t - t0 < 1700) requestAnimationFrame(tick); else res(out); }; requestAnimationFrame(tick); })`);
+const pick = (ms) => frames.find((x) => x[0] >= ms)?.[1];
+console.log('video hover: img scale at 100/300/600/1000/1600 ms', J([100, 300, 600, 1000, 1600].map(pick)));
+await b.shot('63-video-hover');
+const after = await b.evalJs(`(() => { const e = document.querySelector('.vid__frame'); return { mark: getComputedStyle(e.querySelector('.vid__mark > span')).transform, markBg: getComputedStyle(e.querySelector('.vid__mark > span')).backgroundColor }; })()`);
+console.log('mark idle->hover', J([f.mark, f.markBg]), '->', J([after.mark, after.markBg]));
+// IG card
+await b.move(5, 5);
+const itop = await docTop(b, '.strip__view');
+await b.wheelTo(itop - 250, W / 2, H / 2, { tol: 30 }); await sleep(1800);
+const c = await b.evalJs(`(() => { const v = document.querySelector('.strip__view').getBoundingClientRect(); const cards = [...document.querySelectorAll('.strip__set .ig-card')].map((a) => ({ a, r: a.getBoundingClientRect() })).filter((o) => o.r.left > v.left + 100 && o.r.right < v.right - 100); const o = cards[0]; const e = document.elementFromPoint(o.r.left + o.r.width / 2, o.r.top + o.r.height / 2); return { x: o.r.left + o.r.width / 2, y: o.r.top + o.r.height / 2, hit: e.tagName + '.' + String(e.className).split(' ')[0], n: cards.length, go: getComputedStyle(o.a.querySelector('.ig-card__go')).opacity }; })()`);
+console.log('ig card', J(c));
+await b.shot('64-ig-idle');
+await b.move(c.x, c.y); await sleep(900);
+const ig = await b.evalJs(`(() => { const a = document.querySelector('.ig-card:hover'); return a ? { go: getComputedStyle(a.querySelector('.ig-card__go')).opacity, img: getComputedStyle(a.querySelector('img')).transform, paused: document.querySelector('.strip__track').getAnimations()[0].playState } : null; })()`);
+console.log('ig hover', J(ig));
+await b.shot('65-ig-hover');
+console.log('errors', J(b.errors));
+await b.close(); process.exit(0);

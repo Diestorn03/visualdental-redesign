@@ -1,0 +1,33 @@
+/* d4 SPEC · CSS for src/components/sections/Services.astro <style> (Astro-scoped syntax, :global() as in the file today).
+   Validated at runtime by tools/qa/probes/d4-spec-run.mjs, which strips the :global() wrappers and injects this very text.
+
+   DELETE from the current <style>:
+     • `--pw: clamp(240px, 24vw, 400px);` in `.svc { ... }`            (the panel is no longer a fixed-size floating box)
+     • `.svc__hint` and `.svc__hint svg` rules (lines 114-115) and `:global(html.js:not(.calm)) .svc__hint { display: block; }` (line 148)
+     • the whole "floating panel" block, lines 156-164 (`.svc__lane` stays, see below), including `.svc__tag`
+   CHANGE:
+     • `.svc__row::after` transition: `var(--d-slow)` -> `var(--d-base)`   (rows now change every ~300 ms while scrolling; a 0.9 s draw never ends)
+     • `.svc__title` transition: add `color var(--d-base) var(--ease-out)`
+     • the three `html.is-desktop-fx` choreography rules (lines 152-154): replace by the "active row" block below
+   ADD the "active row" and "sticky preview" blocks below.  (.svc__thumb gating at lines 146-147 stays: touch / narrow / reduced keep the inline photo.)  */
+
+/* ---------- active row (only with the preview: html.is-desktop-fx). Once initialised there is always one. ---------- */
+:global(html.is-desktop-fx) .svc__list.is-active .svc__row:not(.is-active) :is(.svc__num, .svc__title) { opacity: 0.55; }
+:global(html.is-desktop-fx) .svc__row.is-active::after { transform: scaleX(1); }
+:global(html.is-desktop-fx) .svc__row.is-active :is(.svc__num, .svc__title) { color: var(--stroke); }
+/* arrow that points at the preview (the lane), drawn in the gap between the text column and the lane */
+:global(html.is-desktop-fx) .svc__row::before { content: '\2192'; position: absolute; right: calc(var(--lane) + 6px); top: clamp(28px, 3.6vw, 52px); font-family: var(--font-label); font-size: var(--step-2); line-height: 1; color: var(--stroke); opacity: 0; transform: translateX(-10px); transition: opacity var(--d-base) var(--ease-out), transform var(--d-slow) var(--ease-out); pointer-events: none; }
+:global(html.is-desktop-fx) .svc__row.is-active::before { opacity: 1; transform: none; }
+
+/* ---------- sticky preview: lives INSIDE .svc__lane (absolute, as tall as the list), so it sticks while the list scrolls and leaves with it ---------- */
+.svc__lane { position: absolute; top: 0; bottom: 0; right: 0; width: var(--lane); pointer-events: none; } /* unchanged */
+.svc__panel { display: none; margin: 0 0 24px; }
+:global(html.is-desktop-fx) .svc__panel { display: block; position: sticky; top: calc(var(--header-h) + 24px); }
+.svc__frame { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--surface); }
+/* slides stay display:none until the list is near the viewport (JS adds .is-warm to .svc__panel); JS then toggles visibility / clip-path */
+.svc__slide { position: absolute; inset: 0; display: none; visibility: hidden; overflow: hidden; clip-path: inset(100% 0% 0% 0%); }
+.svc__panel.is-warm .svc__slide { display: block; }
+.svc__slide :global(img), .svc__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.svc__cap { display: flex; align-items: baseline; gap: 0.6rem; margin-top: 14px; font-family: var(--font-label); font-size: var(--step--1); letter-spacing: 0.14em; text-transform: uppercase; line-height: 1.4; color: var(--fg); }
+.svc__cap-n { flex: none; color: var(--stroke); }
+.svc__cap-n::after { content: ' \2014'; color: var(--muted); }

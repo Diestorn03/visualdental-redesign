@@ -18,6 +18,7 @@ export default defineConfig({
   // one cache dir per dev server (VITE_CACHE_DIR=.vite-a1 …) so several can run side by side
   vite: {
     cacheDir: process.env.VITE_CACHE_DIR || 'node_modules/.vite',
+    build: { chunkSizeWarningLimit: 800 }, // three.js (~720 kB) is its own chunk, loaded with import() only by #digital: not on the critical path, so no warning
     server: { watch: { ignored: ['**/.shots/**', '**/.vite-*/**'] } }, // QA Chrome profiles and extra Vite caches flood the watcher
   },
 });

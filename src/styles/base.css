@@ -77,11 +77,11 @@ main > #services, main > #faq { padding-top: max(calc(var(--section-y) * 0.4), c
 @keyframes vd-failsafe { to { opacity: 1; visibility: visible; } }
 html.js:not(.fx-booted) :is([data-reveal], [data-stagger] > *, [data-draw], [data-split], [data-lit]) { animation: vd-failsafe 0.4s ease 4s forwards; }
 .split-line-mask, .split-word-mask { padding-block: 0.12em; margin-block: -0.12em; } /* room for descenders and italic overhangs inside SplitText masks */
-/* sibling line masks would collapse their negative margins (-.12em, not -.24em) and make the heading grow while split; a flex column keeps the height identical so the revert does not shift layout */
-:has(> .split-line-mask) { display: flex; flex-direction: column; }
+/* The split stays after the entrance (engine.js never reverts it), so its height must equal the plain text's. Sibling line masks would collapse their
+   negative margins (-.12em, not -.24em) and the heading would grow; a flex column keeps them apart. Class set by the engine, no :has() to evaluate. */
+.is-split { display: flex; flex-direction: column; }
 .lit-word { display: inline-block; }
-/* sections far from the viewport stop ticking their infinite CSS animations (engine.js sets [data-offscreen]) */
-[data-offscreen] *, [data-offscreen] *::before, [data-offscreen] *::after { animation-play-state: paused !important; }
+/* sections far from the viewport pause their infinite CSS animations: engine.js does it with Animation.pause() (a `[data-offscreen] *` rule restyled the whole section each time) */
 
 /* ---------- reduced motion: the OS setting OR the footer "Reduce motion" switch (html.calm, set before first paint) ---------- */
 @media (prefers-reduced-motion: reduce) {

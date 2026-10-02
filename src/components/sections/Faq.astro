@@ -56,6 +56,10 @@ const faqs = [
   .faq__grid { display: grid; gap: clamp(32px, 6vw, 56px); }
   .faq__cta { margin-top: clamp(24px, 3vw, 40px); }
 
+  /* the engine's reveals write opacity/transform from JS on these blocks: on their own layers a frame of the reveal moves a texture instead of
+     re-rasterising the tiles under it (measured scrolling #faq: ~1040 raster tasks per pass before) */
+  .faq__cta, .faq__list > .faq__item, :global(#faq .split-line) { will-change: transform, opacity; }
+
   .faq__list { border-bottom: 1px solid var(--line); }
   .faq__item { border-top: 1px solid var(--line); }
 
@@ -108,3 +112,31 @@ const faqs = [
     .faq__list { grid-column: 6 / span 7; }
   }
 </style>
+
+<script>
+  // Exclusive accordion: opening a question closes the open one, and when that one is ABOVE the click the clicked row used to slide up by its whole
+  // height (measured: 120 px in 0.9 s, away from the pointer). Keep the clicked question on the same spot of the viewport while the two heights
+  // animate (a scrollBy per frame, only during the toggle). The engine's body ResizeObserver re-measures the sections below afterwards (sections never
+  // call refresh themselves, see engine.js), so nothing has to be announced from here.
+  import { onPage } from '../../scripts/engine.js';
+  onPage(() => {
+    const list = document.querySelector('.faq__list');
+    if (!list) return;
+    let id = 0;
+    const stop = () => { cancelAnimationFrame(id); id = 0; };
+    ['wheel', 'touchstart', 'keydown'].forEach((ev) => addEventListener(ev, () => { if (id) { cancelAnimationFrame(id); id = 0; } }, { passive: true }));
+    list.addEventListener('click', (e) => {
+      const sum = e.target.closest('summary');
+      if (!sum) return;
+      stop();
+      const y0 = sum.getBoundingClientRect().top;
+      const t0 = performance.now();
+      const hold = () => {
+        const dy = sum.getBoundingClientRect().top - y0;
+        if (Math.abs(dy) > 0.5) scrollBy({ top: dy, behavior: 'instant' });
+        id = performance.now() - t0 < 1100 ? requestAnimationFrame(hold) : 0;
+      };
+      id = requestAnimationFrame(hold);
+    });
+  });
+</script>

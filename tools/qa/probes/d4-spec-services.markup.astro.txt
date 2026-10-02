@@ -1,0 +1,32 @@
+{/* d4 SPEC · markup changes for src/components/sections/Services.astro (frontmatter and the rows <ol> stay exactly as they are) */}
+
+1) DELETE the margin note inside <header class="svc__head"> (lines 32-39): the whole <p class="svc__hint hand" ...>…</p> with its <svg data-draw>.
+   The photo is now always on screen next to the list, so the "Hover a row" note has nothing left to explain.
+
+2) REPLACE lines 59-75 (the decorative lane + the floating panel, two siblings) by ONE lane that CONTAINS the panel:
+
+      {/* decorative, aria-hidden: the lane is as tall as the list; the preview sticks inside it (CSS) and JS only picks the photo */}
+      <div class="svc__lane" aria-hidden="true">
+        <figure class="svc__panel">
+          <div class="svc__frame">
+            {items.map((it, i) => (
+              <div class="svc__slide">
+                {it.key === 'ceramic' && loop ? (
+                  <video class="svc__video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" width={loop.w} height={loop.h} data-poster={asset(`${loop.poster.base}-960.jpg`)}>
+                    <source src={asset(`${loop.base}.webm`)} type="video/webm" />
+                    <source src={asset(`${loop.base}.mp4`)} type="video/mp4" />
+                  </video>
+                ) : (
+                  <Picture img={media.services[it.key]} sizes="(min-width: 1400px) 400px, 30vw" alt="" />
+                )}
+              </div>
+            ))}
+          </div>
+          <figcaption class="svc__cap"><span class="svc__cap-n num" data-cap-n>01</span><span data-cap-t>{items[0].title}</span></figcaption>
+        </figure>
+      </div>
+
+   (no .svc__tag chip any more: the caption carries "0N — Title"; the same title text is read from each row's .svc__title by services.js)
+
+3) Update the header comment of the component (it still says "floating panel that trails the pointer"), and the README "Efectos y movimiento" row for Services:
+   "Índice 01–06. La foto de la fila activa queda anclada (sticky) a la derecha; la fila activa cambia con hover, foco o scroll".

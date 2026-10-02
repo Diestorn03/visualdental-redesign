@@ -110,6 +110,8 @@ const formats = ['Hands-on workshops', 'Lunch-and-learns', 'Case review sessions
   .plate__stage { position: relative; aspect-ratio: 1076 / 810; margin-inline: calc(var(--gutter) * -1); } /* narrow: the photo bleeds to the screen edges (its black merges with the page) */
   .plate__photo { position: absolute; inset: 0; mask-image: linear-gradient(to bottom, transparent 12%, #000 25%); } /* the macro is cut flat at the top of the gum: let it emerge from the dark */
   .plate__svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  /* the scrub redraws strokes every frame: own layer, so only this transparent plane is re-rastered, never the photo (masked) or the labels under it */
+  :global(html.is-desktop-fx) .plate__svg { will-change: transform; }
   /* constant stroke width at any scale (DrawSVG reads the vector-effect); a faint dark under-stroke keeps lines legible over the pale porcelain */
   .plate__svg path, .plate__svg circle { vector-effect: non-scaling-stroke; }
   .halo { stroke: rgb(22 20 20 / 0.6); stroke-width: 4px; }
@@ -156,6 +158,7 @@ const formats = ['Hands-on workshops', 'Lunch-and-learns', 'Case review sessions
     .anno__name .hand { font-size: clamp(1.05rem, 0.85rem + 0.55vw, 1.4rem); line-height: 1.15; }
     .anno__n { width: auto; height: auto; border: 0; border-radius: 0; align-self: flex-start; margin-top: 0.3em; font-size: 0.75rem; letter-spacing: 0.14em; color: var(--stroke); }
     .anno__txt { padding-left: 0; margin-top: 6px; }
+    :global(html.is-desktop-fx) .anno__in { will-change: transform, opacity; } /* slide + fade of each label without repainting the page */
   }
 
   /* ---------- education block ---------- */

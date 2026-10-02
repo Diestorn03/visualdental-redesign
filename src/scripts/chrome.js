@@ -43,12 +43,17 @@ onPage(({ env }) => {
   // glass after 24 px; hides on scroll down, returns on scroll up. Hiding waits for the reader's first input, so a restored scroll
   // position or a #hash landing never starts with a hidden header.
   // a nav click keeps it visible while the page glides to the section (until the reader scrolls by hand, or 3 s)
-  let lastY = scrollY, armed = false, pinned = false, unpin;
+  // `run` = distance travelled in the current direction; it restarts when the direction flips, so a trackpad's rubber-band or Lenis' tail never
+  // flicks the bar: it hides after 80 px down and returns after 40 px up (the old rule flipped on a single 6 px frame delta).
+  let lastY = scrollY, run = 0, armed = false, pinned = false, unpin;
   const onScroll = raf(() => {
     const y = scrollY, d = y - lastY;
+    lastY = y;
     hdr.classList.toggle('is-scrolled', y > 24);
-    if (y < 120 || d < -6) { hdr.classList.remove('is-hidden'); lastY = y; }
-    else if (d > 6 && armed && !pinned && !menu?.open) { hdr.classList.add('is-hidden'); lastY = y; }
+    if (y < 120) { run = 0; hdr.classList.remove('is-hidden'); return; }
+    run = d * run < 0 ? d : run + d;
+    if (run < -40) hdr.classList.remove('is-hidden');
+    else if (run > 80 && armed && !pinned && !menu?.open) hdr.classList.add('is-hidden');
   });
   ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach((ev) => addEventListener(ev, () => { armed = true; }, { once: true, passive: true }));
   ['wheel', 'touchstart', 'keydown'].forEach((ev) => addEventListener(ev, () => { pinned = false; }, { passive: true }));
@@ -102,7 +107,7 @@ onPage(({ env }) => {
   matchMedia('(min-width: 1100px)').addEventListener('change', (m) => { if (m.matches) close(true); });
 });
 
-/* ---------- Floating contact: after the hero, away from #contact / the footer / [data-fab-hide] ---------- */
+/* ---------- Floating contact: after the hero, away from #contact / the footer / #digital (wide) / [data-fab-hide] ---------- */
 onPage(() => {
   const fab = document.querySelector('[data-fab]');
   if (!fab) return;
@@ -116,11 +121,15 @@ onPage(() => {
     root.classList.toggle('past-hero', past); // PaletteSwitch stays out of the phone's first screen (it would cover the hero CTA)
   };
   if (hero) new IntersectionObserver(([e]) => { past = !e.isIntersecting; update(); }, { rootMargin: '-55% 0px 0px 0px' }).observe(hero);
+  const contact = document.getElementById('contact');
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => (e.isIntersecting ? hold.add(e.target) : hold.delete(e.target)));
+    root.classList.toggle('in-contact', hold.has(contact)); // PaletteSwitch steps aside too: it sat on top of the channel / link lines
     update();
   }, { rootMargin: '-12% 0px -12% 0px' });
-  document.querySelectorAll('#contact, body > footer, [data-fab-hide]').forEach((el) => io.observe(el));
+  // #digital on wide screens: the pill sat on top of the next step's title in the right column (phones keep the bar: it has its own strip)
+  const wide = matchMedia('(min-width: 768px)').matches;
+  document.querySelectorAll(`#contact, body > footer, [data-fab-hide]${wide ? ', #digital' : ''}`).forEach((el) => io.observe(el));
   followTheme(() => innerHeight - 44, (t) => { fab.dataset.theme = t; });
   update();
 });
@@ -173,10 +182,16 @@ onPage(({ gsap, env }) => {
     }
   }
 
-  const fill = f.querySelector('[data-fill]');
-  if (!fill || env.reduced) return; // reduced: CSS leaves the wordmark fully drawn
-  const from = { clipPath: 'inset(0 100% 0 0)' }, to = { clipPath: 'inset(0 0% 0 0)' };
-  const trigger = fill.parentElement;
-  if (env.desktop) gsap.fromTo(fill, from, { ...to, ease: 'none', scrollTrigger: { trigger, start: 'top 96%', endTrigger: f, end: 'bottom bottom', scrub: 0.6 } });
-  else gsap.fromTo(fill, from, { ...to, duration: 1.8, ease: 'power2.inOut', scrollTrigger: { trigger, start: 'top 92%', once: true } });
+  // wordmark wipe, left to right: the sheet ([data-fill]) slides in while the lettering inside slides back (both compositor layers, transform only;
+  // a scrubbed clip-path re-rasterised the type every frame). Reduced motion / no engine: the lettering is simply fully drawn.
+  const sheet = f.querySelector('[data-fill]');
+  const ink = sheet?.firstElementChild;
+  if (!ink || env.reduced) return;
+  const trigger = sheet.parentElement;
+  const [to, st] = env.desktop
+    ? [{ ease: 'none' }, { trigger, start: 'top 96%', endTrigger: f, end: 'bottom bottom', scrub: true }] // desktop = Lenis is on: it already smooths, no second lag layer
+    : [{ duration: 1.8, ease: 'power2.inOut' }, { trigger, start: 'top 92%', once: true }];
+  gsap.timeline({ scrollTrigger: st })
+    .fromTo(sheet, { xPercent: -100 }, { xPercent: 0, ...to }, 0)
+    .fromTo(ink, { xPercent: 100 }, { xPercent: 0, ...to }, 0);
 });

@@ -65,10 +65,12 @@ import { url } from '../../lib/url.js';
   /* two backdrops, crossfaded: a soft scrim over the hero, a glass bar with a hairline once the page has scrolled */
   .hdr::before, .hdr::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; transition: opacity 0.45s var(--ease-out), background-color 0.35s var(--ease-out); }
   .hdr::before { background: linear-gradient(to bottom, color-mix(in srgb, var(--bg) 72%, transparent), transparent); }
-  .hdr::after { background: color-mix(in srgb, var(--bg) 76%, transparent); border-bottom: 1px solid var(--line); -webkit-backdrop-filter: blur(16px) saturate(140%); backdrop-filter: blur(16px) saturate(140%); opacity: 0; }
+  /* No backdrop-filter: it re-blurred what scrolls under the bar on every frame (A/B: compositor time +0.12 ms/frame, p95 1.1 vs 0.8 ms on a desktop GPU,
+     several times that on phones) for a bar that is 72 px of flat colour. 99 % ink/paper still reads as glass and costs nothing.
+     At 95 % the type underneath ghosted through on the light sections (pixel check over FAQ text: luminance 232 against a 244 ground; 99 %: 1-2 levels). */
+  .hdr::after { background: color-mix(in srgb, var(--bg) 99%, transparent); border-bottom: 1px solid var(--line); opacity: 0; }
   .hdr.is-scrolled::before { opacity: 0; }
   .hdr.is-scrolled::after { opacity: 1; }
-  :global(html.is-lite) .hdr::after { background: color-mix(in srgb, var(--bg) 94%, transparent); -webkit-backdrop-filter: none; backdrop-filter: none; }
 
   .hdr__bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 100%; }
   .hdr__brand { display: inline-flex; align-items: center; justify-self: start; min-height: 44px; }
@@ -79,6 +81,9 @@ import { url } from '../../lib/url.js';
   .hdr__nav a::after { content: ''; position: absolute; left: 14px; right: 14px; bottom: 7px; height: 1px; background: var(--stroke); transform: scaleX(0); transform-origin: left; transition: transform var(--d-base) var(--ease-out); }
   .hdr__nav a:hover, .hdr__nav a[aria-current] { color: var(--fg); }
   .hdr__nav a:hover::after, .hdr__nav a[aria-current]::after { transform: scaleX(1); }
+  .hdr__nav ul:hover a[aria-current]:not(:hover)::after { transform: scaleX(0); } /* one underline at a time: it follows the pointer, so "current" and "hover" never read as two selections */
+  .hdr__brand :global(.logo__word) { transition: color var(--d-base) var(--ease-out); }
+  .hdr__brand:hover :global(.logo__word) { color: var(--stroke); }
 
   .hdr__actions { display: flex; align-items: center; gap: 12px; }
   .hdr :global(.hdr__cta) { display: none; }

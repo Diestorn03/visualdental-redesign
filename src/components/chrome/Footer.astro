@@ -53,7 +53,7 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
 
     <div class="ftr__giant" aria-hidden="true">
       <div class="ftr__wm ftr__wm--ghost"><span class="ftr__l1">Visual Dental</span><span class="ftr__l2"><i></i><b>Arts</b><i></i></span></div>
-      <div class="ftr__wm ftr__wm--fill" data-fill><span class="ftr__l1">Visual Dental</span><span class="ftr__l2"><i></i><b>Arts</b><i></i></span></div>
+      <div class="ftr__wipe" data-fill><div class="ftr__wm ftr__wm--fill"><span class="ftr__l1">Visual Dental</span><span class="ftr__l2"><i></i><b>Arts</b><i></i></span></div></div>
     </div>
 
     <div class="ftr__bottom">
@@ -100,18 +100,18 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
   .ftr__giant { container-type: inline-size; position: relative; margin-top: clamp(64px, 9vw, 128px); }
   .ftr__wm { display: grid; width: max-content; font-family: var(--font-label); font-weight: 300; font-size: 13.55cqw; line-height: 0.98; letter-spacing: 0.16em; text-transform: uppercase; white-space: nowrap; user-select: none; }
   .ftr__wm--ghost { color: color-mix(in srgb, var(--fg) 7%, transparent); }
-  .ftr__wm--fill { position: absolute; inset: 0; color: var(--stroke); }
+  /* the wipe is two counter-translated compositor layers (chrome.js): the sheet slides in from the left while the lettering inside slides back, so the
+     lettering stands still and the visible part grows. clip-path scrubbed from JS re-rasterised 100 px type every frame (measured over the footer's scroll:
+     423 raster tasks / 259 ms paint / 244 ms GPU raster vs 60 / 70 / 83 ms with the fill hidden). */
+  .ftr__wipe { position: absolute; inset: 0; overflow: hidden; will-change: transform; }
+  .ftr__wm--fill { position: absolute; inset: 0; color: var(--stroke); will-change: transform; }
   .ftr__l1 { margin-right: -0.16em; }
   .ftr__l2 { display: flex; align-items: center; gap: 0.32em; }
   .ftr__l2 b { font-weight: inherit; margin-right: -0.16em; }
   .ftr__l2 i { flex: 1; height: 0.05em; border-radius: 1em; background: currentColor; }
   .ftr__wm--ghost i { background: color-mix(in srgb, var(--fg) 12%, transparent); }
-  /* hidden only when JS runs and motion is allowed; failsafe shows it after 4 s if the engine never boots */
-  :global(html.js) .ftr__wm--fill { clip-path: inset(0 100% 0 0); }
-  :global(html.js:not(.fx-booted)) .ftr__wm--fill { animation: ftr-failsafe 0.4s ease 4s forwards; }
-  @keyframes ftr-failsafe { to { clip-path: inset(0); } }
-  @media (prefers-reduced-motion: reduce) { :global(html.js) .ftr__wm--fill { clip-path: none !important; } }
-  :global(html.js.calm) .ftr__wm--fill { clip-path: none !important; }
+  /* no CSS pre-hide: chrome.js sets the starting offsets itself when the engine boots (a CSS transform here would be read by GSAP as extra px);
+     without the engine (or with reduced motion) the lettering is simply fully drawn */
 
   .ftr__bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 32px; margin-top: clamp(20px, 3vw, 36px); padding-top: 18px; border-top: 1px solid var(--line); font-size: var(--step--1); color: var(--muted); }
   .ftr__copy { margin: 0; }
@@ -120,7 +120,9 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
   .ftr__top :global(.ftr__up) { transform: rotate(-90deg); }
 
   /* Reduce motion: a labelled switch (aria-pressed button) */
-  .calm { display: inline-flex; align-items: center; gap: 0.8rem; min-height: 44px; color: var(--fg); }
+  .calm { display: inline-flex; align-items: center; gap: 0.8rem; min-height: 44px; color: var(--fg); transition: color var(--d-base) var(--ease-out); }
+  .calm:not([disabled]):hover { color: var(--stroke); }
+  .calm:not([disabled]):hover .calm__track { border-color: var(--stroke); }
   .calm[disabled] { cursor: default; opacity: 0.8; }
   .calm__track { position: relative; flex: none; width: 38px; height: 22px; border: 1px solid color-mix(in srgb, var(--fg) 45%, transparent); border-radius: var(--r-pill); transition: background-color var(--d-base) var(--ease-out), border-color var(--d-base) var(--ease-out); }
   .calm__thumb { position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--fg); transition: transform var(--d-base) var(--ease-out), background-color var(--d-base) var(--ease-out); }

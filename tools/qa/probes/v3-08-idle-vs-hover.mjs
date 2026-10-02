@@ -1,0 +1,22 @@
+// v3-08: at step 6 the camera keeps a slow presentation orbit. Is hovering the canvas WITHOUT a button rotating it any more than idle? (A/B, same duration)
+import { start, sleep, OUT, docTop } from './v3-lib.mjs';
+const W = 1366, H = 820;
+const b = await start({ w: W, h: H, tag: `iv`, wait: 3500 });
+const J = (o) => JSON.stringify(o);
+const dTop = await docTop(b, '#digital');
+await b.move(W / 2, H / 2);
+await b.wheelTo(dTop - 300, W / 2, H / 2); await sleep(1500);
+const t0 = Date.now(); while (Date.now() - t0 < 60000 && !(await b.evalJs(`!!(window.__digital && window.__digital.scene) && document.querySelector('#digital').classList.contains('is-live')`))) await sleep(500);
+const geo = await b.evalJs(`window.__digital.geo.a`);
+await b.wheelTo(geo[5], W / 2, H / 2, { tol: 25 }); await sleep(3500);
+const cam = () => b.evalJs(`window.__digital.scene._dbg.camera.position.toArray().map((v) => +v.toFixed(2))`);
+const ang = (p) => Math.atan2(p[0], p[2]) * 180 / Math.PI;
+const box = await b.evalJs(`(() => { const r = document.querySelector('.dg__canvas').getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height, cx: r.left + r.width / 2, cy: r.top + r.height / 2 }; })()`);
+const samp = async (label, fn) => { const a = await cam(); const t = Date.now(); await fn(); const c = await cam(); const dt = (Date.now() - t) / 1000; let d = ang(c) - ang(a); d = ((d + 540) % 360) - 180; console.log(label.padEnd(26), 'yaw change deg:', d.toFixed(2), 'in', dt.toFixed(2), 's =>', (d / dt).toFixed(1), 'deg/s'); return d / dt; };
+await b.move(W - 40, H - 40);
+await samp('idle (pointer away) #1', () => sleep(1200));
+await samp('idle (pointer away) #2', () => sleep(1200));
+await samp('hover, no button', async () => { for (let i = 0; i < 40; i++) { await b.move(box.x + 60 + i * 15, box.cy + 20 + (i % 5)); await sleep(30); } });
+await samp('idle again', () => sleep(1200));
+console.log('errors', J(b.errors));
+await b.close(); process.exit(0);

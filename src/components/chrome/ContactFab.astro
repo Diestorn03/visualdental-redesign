@@ -32,11 +32,10 @@ import { cta, contact } from '../../data/site.js';
   :global(html.js) .fab:not(.is-shown) { opacity: 0; visibility: hidden; transform: translateY(20px); transition: opacity 0.4s var(--ease-out), transform 0.5s var(--ease-out), visibility 0s linear 0.5s; }
 
   @media (max-width: 767px) {
-    .fab { inset: auto 0 0 0; display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg) 88%, transparent); border-top: 1px solid var(--line); -webkit-backdrop-filter: blur(16px) saturate(140%); backdrop-filter: blur(16px) saturate(140%); }
+    .fab { inset: auto 0 0 0; display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg) 95%, transparent); border-top: 1px solid var(--line); } /* no backdrop-filter: a full-width blur re-run on every scroll frame is the costliest thing a phone GPU would do here */
     .fab :global(.btn) { border-radius: var(--radius); box-shadow: none; min-height: 52px; padding-inline: 1rem; letter-spacing: 0.18em; }
     .fab__call { display: inline-flex; gap: 0.6rem; width: auto; height: 52px; border-radius: var(--radius); box-shadow: none; font-family: var(--font-label); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; }
     .fab__call-l { display: inline; }
     :global(html.js) .fab:not(.is-shown) { transform: translateY(100%); }
   }
-  :global(html.is-lite) .fab { -webkit-backdrop-filter: none; backdrop-filter: none; }
 </style>

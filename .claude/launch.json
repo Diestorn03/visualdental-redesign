@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--", "--host", "127.0.0.1", "--port", "4321"],
       "port": 4321
+    },
+    {
+      "name": "visualdents-prod",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["astro", "preview", "--host", "127.0.0.1", "--port", "4330", "--ignore-lock"],
+      "port": 4330
     }
   ]
 }

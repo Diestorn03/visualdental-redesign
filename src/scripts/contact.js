@@ -1,5 +1,7 @@
 // Simulated contact form (docs/CONTENT.md §8): validates, fakes ~900 ms of sending, then shows the thank-you. No fetch, nothing stored.
-// Also preselects Topic from any [data-topic] link in the document and from ?topic= in the URL. Independent of the motion engine on purpose.
+// Also preselects Topic from any [data-topic] link in the document and from ?topic= in the URL. The form itself is independent of the motion engine on purpose;
+// only the studio-photo wipe at the bottom registers with it (and the photo is simply visible when the engine is absent).
+import { onPage } from './engine.js';
 const SENDING_MS = 900;
 const TOPICS = ['new-case', 'support', 'consultation', 'education', 'other'];
 const THANKS = 'Thank you — we\'ll be in touch shortly.';
@@ -105,3 +107,14 @@ function init() {
 }
 
 init();
+
+// Studio photo wipe, top to bottom: the sheet slides in from above while the picture inside counter-slides, so the picture stays put and the
+// visible part grows. Transform only (both are compositor layers, see Contact.astro): animating clip-path from JS repainted the photo every frame.
+onPage(({ gsap, env }) => {
+  const fig = document.querySelector('.studio__photo[data-wipe]');
+  const sheet = fig?.querySelector('.studio__wipe'), pic = fig?.querySelector('.studio__fill');
+  if (!sheet || env.reduced) return;
+  gsap.timeline({ defaults: { duration: 1.3, ease: 'expo.inOut' }, scrollTrigger: { trigger: fig, start: 'top 88%', once: true } })
+    .fromTo(sheet, { yPercent: -100 }, { yPercent: 0 }, 0)
+    .fromTo(pic, { yPercent: 100 }, { yPercent: 0 }, 0);
+});
