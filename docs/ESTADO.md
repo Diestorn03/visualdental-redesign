@@ -5,6 +5,13 @@
   No aparece con "reducir movimiento" ni con `html.calm`. Tiene un failsafe de 6 s. El hero espera a `vd:loader-done`.
 - La verificación r2 (`wf_766bf684-c85`) seguía corriendo al hacer el push. v4 (calidad visual y "wow") **aprobó**, con 5 detalles menores.
   Lo que no haya terminado se retoma leyendo su journal.
+- Verificación r2:
+  - v4 aprobó.
+  - v1 falló. **Importante:** al arrancar el JS, la franja de IG de Stories pasa a marquesina y cambia de alto
+    (-10 px en escritorio), lo que desplaza FAQ, Contacto y footer (área f5). Lo demás es menor.
+  - v3 falló. **Importante:** los CTA hacia `#contact` con `data-topic` hacen dos cortes en vez de un glide (área f2). Lo demás es menor.
+  - v2 (fluidez) corría al cerrar la sesión.
+  - Próxima sesión: corregir esos 2 importantes y los menores baratos, re-verificar, cerrar `docs/FLUIDEZ.md` y hacer push.
 - Pendientes conocidos: los menores de v4 (callout "Prosthetic axis" en móvil, la placa Ø sobre las roscas en p≈0.46,
   y el selector de paleta tapando texto en móvil) y lo que reporten v1, v3 y v2.
 
