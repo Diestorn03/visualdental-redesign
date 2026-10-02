@@ -23,12 +23,15 @@ onPage(({ gsap, env }) => {
   // while the photo blooms under it (CSS, from 0.9 s); then the whole mesh relaxes to the resting blueprint opacity.
   gsap.set(wrap, { opacity: 1 });
   gsap.set([dots, facets], { opacity: 0 });
-  gsap.timeline({ delay: 0.12, defaults: { ease: 'power2.inOut' } })
+  // with the intro loader up, the drawing waits for it (Loader.astro emits 'vd:loader-done' as the curtain lifts)
+  const play = () => gsap.timeline({ delay: 0.12, defaults: { ease: 'power2.inOut' } })
     .fromTo(rim, { drawSVG: '50% 50%' }, { drawSVG: '0% 100%', duration: 1.1 }, 0)
     .fromTo(bands, { drawSVG: '0%' }, { drawSVG: '100%', duration: 0.85, stagger: 0.07 }, 0.22)
     .to(dots, { opacity: 1, duration: 0.8, ease: 'power1.out' }, 0.9)
     .to(facets, { opacity: 1, duration: 1.1, ease: 'power1.out' }, 1.0)
     .to(wrap, { opacity: rest, duration: 1.6, ease: 'power2.inOut' }, 1.8);
+  if (document.documentElement.classList.contains('is-loading')) document.addEventListener('vd:loader-done', play, { once: true });
+  else play();
 
   if (!env.desktop) return;
   const drift = { trigger: root, start: 'top top', end: 'bottom top', scrub: true };

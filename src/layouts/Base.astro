@@ -14,6 +14,7 @@ import Header from '../components/chrome/Header.astro';
 import Footer from '../components/chrome/Footer.astro';
 import ContactFab from '../components/chrome/ContactFab.astro';
 import PaletteSwitch from '../components/chrome/PaletteSwitch.astro';
+import Loader from '../components/chrome/Loader.astro';
 import { brand, contact, social, demo } from '../data/site.js';
 import { asset, url } from '../lib/url.js';
 
@@ -42,7 +43,7 @@ const jsonLd = {
 };
 ---
 <!doctype html>
-<html lang="en" data-theme="dark" data-palette="amber">
+<html lang="en" data-theme="dark" data-palette="amber" data-loader={chrome ? '' : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -79,12 +80,18 @@ const jsonLd = {
         var p = q === 'amber' || q === 'mono' ? q : ls('vd-palette');
         d.setAttribute('data-palette', p === 'mono' ? 'mono' : 'amber');
         if (ls('vd-calm') === '1') d.classList.add('calm');
+        // intro loader (Loader.astro) on every full load, F5 included; not with reduced motion / calm. 6 s failsafe if its script never runs.
+        if (d.hasAttribute('data-loader') && !d.classList.contains('calm') && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+          d.classList.add('is-loading');
+          setTimeout(function () { if (d.classList.contains('is-loading')) { d.classList.remove('is-loading'); document.dispatchEvent(new Event('vd:loader-done')); } }, 6000);
+        }
       })();
     </script>
     <slot name="head" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
+    {chrome && <Loader />}
     {chrome && <Header />}
     <main id="main" tabindex="-1">
       <slot />

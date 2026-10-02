@@ -1,5 +1,13 @@
 # ESTADO · Handoff para retomar (2026-10-01, ~12:57)
 
+## Último estado (2026-10-02 16:05). Push hecho, el usuario lo autorizó por falta de tiempo
+- **Pantalla de carga** (`src/components/chrome/Loader.astro`): sale en cada carga, F5 incluido, con el molar, el wordmark, la barra y el % reales, y un telón que sube.
+  No aparece con "reducir movimiento" ni con `html.calm`. Tiene un failsafe de 6 s. El hero espera a `vd:loader-done`.
+- La verificación r2 (`wf_766bf684-c85`) seguía corriendo al hacer el push. v4 (calidad visual y "wow") **aprobó**, con 5 detalles menores.
+  Lo que no haya terminado se retoma leyendo su journal.
+- Pendientes conocidos: los menores de v4 (callout "Prosthetic axis" en móvil, la placa Ø sobre las roscas en p≈0.46,
+  y el selector de paleta tapando texto en móvil) y lo que reporten v1, v3 y v2.
+
 ## RETOMAR AQUÍ (2026-10-02, la sesión se cortó con el workflow `wf_a80d85d1-883` en la verificación 2)
 - **Hecho:** fase 1 (f1-f5, d1, d2) → build 1 → verificación r1 (v1-v4: **los 4 fallaron**, con 8, 6, 6 y 8 fallos) → ronda de corrección (7 áreas) → build 2.
 - **Informes guardados:** `.shots/wf/fluidez-results.json` (array de 20).
